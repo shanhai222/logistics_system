@@ -3,16 +3,16 @@ pragma solidity >=0.4.16 <0.9.0;
 // Import the library 'Roles'
 import "./Roles.sol";
 
-// Define a contract 'consignerRole' to manage this role - add, remove, check
-contract consignerRole {
+// Define a contract 'ConsignerRole' to manage this role - add, remove, check
+contract ConsignerRole {
   using Roles for Roles.Role;
 
   // Define 2 events, one for Adding, and other for Removing
-  event consignerAdded(address indexed account);
-  event consignerRemoved(address indexed account);
+  event ConsignerAdded(address indexed account);
+  event ConsignerRemoved(address indexed account);
 
-  // Define a struct 'consigners' by inheriting from 'Roles' library, struct Role
-  Roles.Role private consigners;
+  // Define a struct 'Consigners' by inheriting from 'Roles' library, struct Role
+  Roles.Role private Consigners;
 
   // In the constructor make the address that deploys this contract the 1st consigner
   constructor() public {
@@ -27,7 +27,7 @@ contract consignerRole {
 
   // check the role
   function isConsigner(address account) public view returns (bool) {
-    return consigners.has(account);
+    return Consigners.has(account);
   }
 
   // add the role
@@ -41,12 +41,12 @@ contract consignerRole {
   }
 
   function _addConsigner(address account) internal {
-    consigners.add(account);
-    emit consignerAdded(account);
+    Consigners.add(account);
+    emit ConsignerAdded(account);
   }
 
   function _removeConsigner(address account) internal {
-    consigners.remove(account);
-    emit consignerRemoved(account);
+    Consigners.remove(account);
+    emit ConsignerRemoved(account);
   }
 }
