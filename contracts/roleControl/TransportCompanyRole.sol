@@ -3,50 +3,50 @@ pragma solidity >=0.4.16 <0.9.0;
 // Import the library 'Roles'
 import "./Roles.sol";
 
-// Define a contract 'transfer_companyRole' to manage this role - add, remove, check
-contract TransferCompanyRole{
+// Define a contract 'transport_companyRole' to manage this role - add, remove, check
+contract TransportCompanyRole{
   using Roles for Roles.Role;
 
   // Define 2 events, one for Adding, and other for Removing
-  event TransferCompanyAdded(address indexed account);
-  event TransferCompanyRemoved(address indexed account);
+  event TransportCompanyAdded(address indexed account);
+  event TransportCompanyRemoved(address indexed account);
 
-  // Define a struct 'transfer_companies' by inheriting from 'Roles' library, struct Role
-  Roles.Role private TransferCompanies;
+  // Define a struct 'transport_companies' by inheriting from 'Roles' library, struct Role
+  Roles.Role private TransportCompanies;
 
-  // In the constructor make the address that deploys this contract the 1st transfer_company
+  // In the constructor make the address that deploys this contract the 1st transportCompany
   constructor() public {
-    _addTransferCompany(msg.sender);
+    _addTransportCompany(msg.sender);
   }
 
   // check to see if msg.sender has the appropriate role
-  modifier onlyTransferCompany() {
-    require(isTransferCompany(msg.sender));
+  modifier onlyTransportCompany() {
+    require(isTransportCompany(msg.sender));
     _;
   }
 
   // check the role
-  function isTransferCompany(address account) public view returns (bool) {
-    return TransferCompanies.has(account);
+  function isTransportCompany(address account) public view returns (bool) {
+    return TransportCompanies.has(account);
   }
 
   // add the role
-  function addTransferCompany(address account) public onlyTransferCompany {
-    _addTransferCompany(account);
+  function addTransportCompany(address account) public onlyTransportCompany {
+    _addTransportCompany(account);
   }
 
   // renounce this role
-  function renounceTransferCompany() public {
-    _removeTransferCompany(msg.sender);
+  function renounceTransportCompany() public {
+    _removeTransportCompany(msg.sender);
   }
 
-  function _addTransferCompany(address account) internal {
-    TransferCompanies.add(account);
-    emit TransferCompanyAdded(account);
+  function _addTransportCompany(address account) internal {
+    TransportCompanies.add(account);
+    emit TransportCompanyAdded(account);
   }
 
-  function _removeTransferCompany(address account) internal {
-    TransferCompanies.remove(account);
-    emit TransferCompanyRemoved(account);
+  function _removeTransportCompany(address account) internal {
+    TransportCompanies.remove(account);
+    emit TransportCompanyRemoved(account);
   }
 }
