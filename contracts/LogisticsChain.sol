@@ -18,8 +18,8 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     mapping(address => Structure.Roles) roles;
     mapping(uint256 => Structure.OrderDetails) orders;  // oid->orderdetails
     mapping(uint256 => Structure.LogisticsDetails) logistics; // lid->logisticsdetails
-    mapping(address => Structure.OrderDetails) consigneeOrders;  // the orders from the consignee
-    mapping(address => Structure.OrderDetails) consignerOrders;  // the orders to the consigner
+    //mapping(address => Structure.OrderDetails[]) consigneeOrders;  // the orders from the consignee
+    //mapping(address => Structure.OrderDetails[]) consignerOrders;  // the orders to the consigner
 
     function hasConsigneeRole(address _account) public view returns (bool) {
         require(_account != address(0));
@@ -85,7 +85,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
 
     // initialize some orders from the consignee
     function initOrdersForConsignee(Structure.OrderDetails memory order, address _uid) public onlyConsignee{
-      consigneeOrders[_uid] = order;
+      //consigneeOrders[_uid].push(order);
       oid = order.OrderId;
       orders[oid] = order;
 
@@ -93,9 +93,11 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     // initialize some orders to the consigner
+    /*
     function initOrdersForConsigner(Structure.OrderDetails memory order, address _uid) public onlyConsigner{
-      consignerOrders[_uid] = order;
+      consignerOrders[_uid].push(order);
     }
+    */
 
     // checks to see if msg.sender == owner of the contract
     modifier verifyAddress(address add) {
@@ -186,6 +188,6 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         emit CollectedByTransportCompany(_lid);
     }
 
-    
+
 }
 
