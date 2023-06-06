@@ -36,8 +36,6 @@ library Structure {
         address Consignee;
         address TransportCompany;
         string ProductDetails;
-        string ConsignerAddress;
-        string ConsigneeAddress;
         address[] TransferStations;
         State state;
         uint256 CurrentTransferStations;
