@@ -7,14 +7,12 @@ contract LogisticsChain {
 
     event ConsigneeAdded(address indexed _account);
 
-    // product
-    uint256 public uid;
-    uint256 sku;
+    uint256 public oid;  // orderId
     address owner;
 
     mapping(address => Structure.Roles) roles;
-    mapping(uint256 => Structure.OrderDetails) orders;
-    mapping(uint256 => Structure.LogisticsDetails) logisticsOrders;
+    mapping(uint256 => Structure.OrderDetails) orders;  // oid->orderdetails
+    mapping(uint256 => Structure.LogisticsDetails) logistics; // lid->logisticsdetails
 
     function hasConsigneeRole(address _account) public view returns (bool) {
         require(_account != address(0));
@@ -66,56 +64,59 @@ contract LogisticsChain {
 
     constructor() public payable {
         owner = msg.sender;
-        sku = 1;
-        uid = 1;
+        oid = 1;
     }
 
-    event OrderCreated(uint256 uid);
-    event OrderProceeding(uint256 uid);
-    event OrderFinished(uint256 uid);
-    event DeliveredByConsigner(uint256 uid);
-    event CollectedByTransportCompany(uint256 uid);
-    event InTransit(uint256 uid);
-    event Arrived(uint256 uid);
+    //order
+    event OrderCreated(uint256 oid);
+    event OrderProceeding(uint256 oid);
+    event OrderFinished(uint256 oid);
+    //deliver
+    event DeliveredByConsigner(uint256 lid);
+    event CollectedByTransportCompany(uint256 lid);
+    event InTransit(uint256 lid);
+    event Arrived(uint256 lid);
 
     modifier verifyAddress(address add) {
         require(msg.sender == add);
         _;
     }
 
-    modifier orderCreated(uint256 _uid) {
-        require(orders[_uid].state == Structure.State.OrderCreated);
+    modifier orderCreated(uint256 _oid) {
+        require(orders[_oid].state == Structure.State.OrderCreated);
         _;
     }
 
-    modifier orderProceeding(uint256 _uid) {
-        require(orders[_uid].state == Structure.State.OrderProceeding);
+    modifier orderProceeding(uint256 _oid) {
+        require(orders[_oid].state == Structure.State.OrderProceeding);
         _;
     }
 
-    modifier orderFinished(uint256 _uid) {
-        require(orders[_uid].state == Structure.State.OrderFinished);
+    modifier orderFinished(uint256 _oid) {
+        require(orders[_oid].state == Structure.State.OrderFinished);
         _;
     }
         
-    modifier deliveredByConsigner(uint256 _uid) {
-        require(orders[_uid].state == Structure.State.DeliveredByConsigner);
+    modifier deliveredByConsigner(uint256 _lid) {
+        require(logistics[_lid].state == Structure.State.DeliveredByConsigner);
         _;
     }
 
-    modifier collectedByTransportCompany(uint256 _uid) {
-        require(orders[_uid].state == Structure.State.CollectedByTransportCompany);
+    modifier collectedByTransportCompany(uint256 _lid) {
+        require(logistics[_lid].state == Structure.State.CollectedByTransportCompany);
         _;
     }
 
-    modifier inTransit(uint256 _uid) {
-        require(orders[_uid].state == Structure.State.InTransit);
+    modifier inTransit(uint256 _lid) {
+        require(logistics[_lid].state == Structure.State.InTransit);
         _;
     }
 
-    modifier arrived(uint256 _uid) {
-        require(orders[_uid].state == Structure.State.Arrived);
+    modifier arrived(uint256 _lid) {
+        require(logistics[_lid].state == Structure.State.Arrived);
         _;
     }
+
+    
 }
 

@@ -9,5 +9,5 @@ module.exports = function(deployer) {
   deployer.deploy(ConsigneeRole);
   deployer.deploy(TransferStation);
   deployer.deploy(TransportCompany);
-  deployer.deploy(LogisticsChain);
+  deployer.deploy(LogisticsChain, {gas: 88888888});
 };
