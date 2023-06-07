@@ -8,9 +8,10 @@ contract('SupplyChain', function(accounts) {
     const consigner = accounts[1]
     const consignee = accounts[2]
     const transportCompany = accounts[3]
-    const tranferStaion1 = accounts[4]
-    const tranferStaion2 = accounts[5]
-    const tranferStaion3 = accounts[6]
+    const transferStation1 = accounts[4]
+    const transferStation2 = accounts[5]
+    const transferStation3 = accounts[6]
+    const stations = [transferStation1, transferStation2, transferStation3]; 
 
     // declare a order
     const productName = "bread"
@@ -28,7 +29,7 @@ contract('SupplyChain', function(accounts) {
     console.log("Consigners: ", consigner)
     console.log("Consignees: ", consignee)
     console.log("Transport Companys: ", transportCompany)
-    console.log("Transfer Stations: ", tranferStaion1, tranferStaion2, tranferStaion3)
+    console.log("Transfer Stations: ", transferStation1, transferStation2, transferStation3)
 
 
     console.log("<-------TESTING CONTRACT FUNCTIONS------->")
@@ -65,9 +66,10 @@ contract('SupplyChain', function(accounts) {
 
         await logisticsChain.addConsigner(consigner, { from: ownerID })
         await logisticsChain.addConsignee(consignee, { from: ownerID })
-
-        //TODO: register company and station
-
+        await logisticsChain.addTransportCompany(transportCompany, { from: ownerID })
+        await logisticsChain.addTransferStation(transferStation1, { from: ownerID })
+        await logisticsChain.addTransferStation(transferStation2, { from: ownerID })
+        await logisticsChain.addTransferStation(transferStation3, { from: ownerID })
     })
 
     it("1. Create Orders and Search for Details", async () => {
@@ -164,7 +166,7 @@ contract('SupplyChain', function(accounts) {
         assert.equal(consignerLogisticsDetail[10], logisticsID, 'Error: Missing or Invalid LogisticsId')
     })
     
-    it("3. Testing smart contract function collectProductByTransportCompany() that allows transport company to collect the project", async() => {
+    it("3. Testing smart contract function collectProductByTransportCompany() that allows transport company to collect the product", async() => {
         var eventEmitted = false
 
         var event = logisticsChain.CollectedByTransportCompany()
@@ -180,4 +182,102 @@ contract('SupplyChain', function(accounts) {
         
         assert.equal(consigneeLogisticsDetail[8], logisticsState, 'Error: Invalid State of Logistics')
     })
+
+    it("4. Testing function transferProductByTransportCompany() that update transport route and begin to transfer", async () => {
+        var eventEmitted = false
+
+        var event = logisticsChain.InTransit()
+        await event.watch((err, res) => {
+            eventEmitted = true
+            logisticsState = 5
+        })
+
+        await logisticsChain.transferProductByTransportCompany(logisticsID, stations, { from: transportCompany })
+
+        const logisticsDetail = await logisticsChain.searchForLogisticsDetails.call(orderID, { from: consignee })
+
+        assert.strictEqual(JSON.stringify(logisticsDetail[7]), JSON.stringify(stations), 'Error: Transport route update fail');
+        assert.equal(logisticsDetail[8], logisticsState, 'Error: Invalid State of Logistics')
+    })
+    
+    it("5. Testing function updateCurrentTransferStationByTransferStation that Product Transfer To TransferStation1", async () => {
+        var eventEmitted = false
+
+        var event = logisticsChain.InTransit()
+        await event.watch((err, res) => {
+            eventEmitted = true
+            // console.log(err,res);
+        })
+
+        await logisticsChain.updateCurrentTransferStationByTransferStation(logisticsID, { from: transferStation1 })
+
+        const logisticsDetail = await logisticsChain.searchForLogisticsDetails.call(logisticsID, { from: consignee })
+
+        assert.equal(logisticsDetail[9], 1, 'Error: Missing or Invalid Current Transfer Station 1 Message')
+    })
+
+    it("6. Testing function updateCurrentTransferStationByTransferStation that Product Transfer To TransferStation2", async () => {
+        var eventEmitted = false
+
+        var event = logisticsChain.InTransit()
+        await event.watch((err, res) => {
+            eventEmitted = true
+            // console.log(err,res);
+        })
+
+        await logisticsChain.updateCurrentTransferStationByTransferStation(logisticsID, { from: transferStation2 })
+
+        const logisticsDetail = await logisticsChain.searchForLogisticsDetails.call(logisticsID, { from: consignee })
+
+        assert.equal(logisticsDetail[9], 2, 'Error: Missing or Invalid Current Transfer 2 Station Message')
+    })
+
+    it("7. Testing function updateCurrentTransferStationByTransferStation that Product Transfer To TransferStation3", async () => {
+        var eventEmitted = false
+
+        var event = logisticsChain.InTransit()
+        await event.watch((err, res) => {
+            eventEmitted = true
+            // console.log(err,res);
+        })
+
+        await logisticsChain.updateCurrentTransferStationByTransferStation(logisticsID, { from: transferStation3 })
+
+        const logisticsDetail = await logisticsChain.searchForLogisticsDetails.call(logisticsID, { from: consignee })
+
+        assert.equal(logisticsDetail[9], 3, 'Error: Missing or Invalid Current Transfer Station 3 Message')
+    })
+
+    it("8. Testing function arrivedProductByFinalTransferStation that Product arrived", async () => {
+        var eventEmitted = false
+
+        var event = logisticsChain.InTransit()
+        await event.watch((err, res) => {
+            eventEmitted = true
+            logisticsState = 6
+        })
+
+        await logisticsChain.arrivedProductByFinalTransferStation(logisticsID, { from: transferStation3 })
+
+        const logisticsDetail = await logisticsChain.searchForLogisticsDetails.call(logisticsID, { from: consignee })
+
+        assert.equal(logisticsDetail[8], logisticsState, 'Error: Invalid State of Logistics')
+    })
+
+    it("9. Testing function orderFinishedByConsignee that Consignee finish the order", async () => {
+        var eventEmitted = false
+
+        var event = logisticsChain.Arrived()
+        await event.watch((err, res) => {
+            eventEmitted = true
+            orderState = 2
+        })
+
+        await logisticsChain.orderFinishedByConsignee(orderID, { from: consignee })
+
+        const returnOrderDetail = await logisticsChain.searchForOrderDetails.call(orderID, { from: consignee })
+
+        assert.equal(returnOrderDetail[6], orderState, 'Error: Invalid State of order')
+    })
+
 });

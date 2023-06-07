@@ -3,13 +3,13 @@ pragma solidity >=0.4.16 <0.9.0;
 
 library Structure {
     enum State {
-        OrderCreated,
-        OrderProceeding,
-        OrderFinished,
-        DeliveredByConsigner,
-        CollectedByTransportCompany,
-        InTransit,
-        Arrived
+        OrderCreated, // 0
+        OrderProceeding, // 1
+        OrderFinished, // 2
+        DeliveredByConsigner, // 3
+        CollectedByTransportCompany, // 4
+        InTransit, // 5
+        Arrived // 6
     }
     struct OrderDetails {
         address Consigner;

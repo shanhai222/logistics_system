@@ -264,7 +264,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     */
     function transferProductByTransportCompany(uint256 _lid, address[] memory stations) public 
     onlyTransportCompany()
-    deliveredByConsigner(_lid)
+    collectedByTransportCompany(_lid)
     logisticsBelongsToCaller(_lid)
     {
         bool stationsExist = true;
