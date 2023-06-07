@@ -44,13 +44,13 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         _;
     }
 
-    modifier orderBelongsToCaller(uint _oid) {
+    modifier orderBelongsToCaller(uint256 _oid) {
         require(orders[_oid].Consigner == msg.sender || orders[_oid].Consignee == msg.sender);
         _;
     }
 
-    modifier logisticsBelongsToCaller(uint _lid) {
-        require(logistics[_lid].Consigner == msg.sender || logistics[_lid].Consignee == msg.sender || logistics[_lid].TransportCompany == msg.sender || logistics[_lid].TransferStation == msg.sender);
+    modifier logisticsBelongsToCaller(uint256 _lid) {
+        require(logistics[_lid].Consigner == msg.sender || logistics[_lid].Consignee == msg.sender || logistics[_lid].TransportCompany == msg.sender);
         _;
     }
 
@@ -93,25 +93,25 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     function searchForOrdersOfConsigner(address _add) public view returns(uint256[] memory orderId)
     {
         uint256[] memory ordersOfConsigner = consignerOrders[_add];
-        return orders;
+        return ordersOfConsigner;
     }
 
     // declare a function to search for all the orders of the consignee
     function searchForOrdersOfConsignee(address _add) public view returns(uint256[] memory orderID) {
         uint256[] memory ordersOfConsignee = consigneeOrders[_add];
-        return orders;
+        return ordersOfConsignee;
     }
     
     // declare a function to search fo all the logistics of the consigner
     function searchForLogisticsOfConsigner(address _add) public view returns(uint256[] memory logisticsID) {
         uint256[] memory logisticsOfConsigner = consignerLogistics[_add];
-        return logistics;
+        return logisticsOfConsigner;
     }
 
     // declare a function to search fo all the logistics of the consignee
     function searchForLogisticsOfConsignee(address _add) public view returns(uint256[] memory logisticsID) {
         uint256[] memory logisticsOfConsignee = consigneeLogistics[_add];
-        return logistics;
+        return logisticsOfConsignee;
     }
 
     // declare a function to search for specific order
@@ -220,6 +220,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     function convertOrdersIntoLogisicsByConsigners(uint256 _oid, address _TransportCompany) public 
     onlyConsigner() 
     orderCreated(_oid) 
+    orderBelongsToCaller(_oid)
     {   
 
         orders[_oid].state = Structure.State.OrderProceeding;  // change the state of the order
@@ -245,9 +246,10 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     3rd step in logisticschain
     Allows transport company to collect
     */
-    function collectProductByTransportCompany(uint _lid) public 
+    function collectProductByTransportCompany(uint256 _lid) public 
     onlyTransportCompany()
     deliveredByConsigner(_lid)
+    logisticsBelongsToCaller(_lid)
     {
         logistics[_lid].state = Structure.State.CollectedByTransportCompany;  // change the state of the logistics
 
@@ -261,11 +263,11 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     function transferProductByTransportCompany(uint256 _lid, address[] memory stations) public 
     onlyTransportCompany()
     deliveredByConsigner(_lid)
-    verifyCaller(logistics[_lid].TransportCompany)
+    logisticsBelongsToCaller(_lid)
     {
         bool stationsExist = true;
         for (uint i = 0; i < stations.length; i++) {
-            if (!hasTransferStationRole(stations[i])) {
+            if (!isTransferStation(stations[i])) {
                 stationsExist = false;
             }
         }
@@ -322,8 +324,8 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     onlyConsignee() 
     orderProceeding(_oid)
     arrived(_oid)
-    verifyCaller(orders[_oid].Consignee) 
-    verifyCaller(logistics[_oid].Consignee) 
+    orderBelongsToCaller(_oid)
+    logisticsBelongsToCaller(_oid)
     {
         orders[_oid].state = Structure.State.OrderFinished;
         address consignee = orders[_oid].Consignee;
