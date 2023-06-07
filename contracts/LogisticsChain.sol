@@ -238,6 +238,8 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         one_logistics.LogisticsId = orderDetail.OrderId;
         lid = _oid;
         logistics[lid] = one_logistics;
+        consignerLogistics[msg.sender].push(lid);
+        consigneeLogistics[orderDetail.Consignee].push(lid);
 
         emit DeliveredByConsigner(lid);
     }

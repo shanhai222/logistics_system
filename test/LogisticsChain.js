@@ -18,7 +18,9 @@ contract('SupplyChain', function(accounts) {
     const productPrice = 5
     const productQuantity = 2
     const orderID = 1
-    var state = 0
+    var logisticsID = 1
+    var orderState = 0
+    var logisticsState = 3
     const orderCreatedDate = "2023-6-2"
 
     console.log("<----------------ACCOUNTS----------------> ")
@@ -68,14 +70,12 @@ contract('SupplyChain', function(accounts) {
 
     })
 
-    // Create some orders and search for detail
-    it("1. Create Orders And Search For Details", async () => {
+    it("1. Create Orders and Search for Details", async () => {
         var eventEmitted = false
 
         var event = logisticsChain.OrderCreated()
         await event.watch((err, res) => {
             eventEmitted = true
-            console.log(err,res);
         })
 
         await logisticsChain.initOrdersForConsignee(consigner,consignee,productName,productCode,productPrice,productQuantity,state,orderID,orderCreatedDate,{ from: consignee })
@@ -87,17 +87,97 @@ contract('SupplyChain', function(accounts) {
         const consigneeOrderDetail = await logisticsChain.searchForOrderDetails.call(orderID, { from: consignee })
         const consignerOrderDetail = await logisticsChain.searchForOrderDetails.call(orderID, { from: consigner })
 
-        assert.equal(ordersOfConsignee, orderID, 'Error: Invalid OrderId Colllection Of Consigee')
-        assert.equal(ordersOfConsigner, orderID, 'Error: Invalid OrderId Colllection Of Consigner')
+        assert.equal(ordersOfConsignee, orderID, 'Error: Invalid OrderId Colllection of Consigee')
         assert.equal(consigneeOrderDetail[0], consigner, 'Error: Missing or Invalid Consigner Message')
         assert.equal(consigneeOrderDetail[1], consignee, 'Error: Missing or Invalid Consignee Message')
         assert.equal(consigneeOrderDetail[2], productName, 'Error: Missing or Invalid Product Name')
-        assert.equal(consigneeOrderDetail[3], productCode, 'Error: Missing or Invalid')
-        assert.equal(consigneeOrderDetail[4], productPrice, '')
-        assert.equal(consigneeOrderDetail[5], productQuantity, '')
-        assert.equal(consigneeOrderDetail[6], state, '')
-        assert.equal(consigneeOrderDetail[7], orderID, '')
-        assert.equal(consigneeOrderDetail[8], orderCreatedDate, '')
+        assert.equal(consigneeOrderDetail[3], productCode, 'Error: Missing or Invalid Product Code')
+        assert.equal(consigneeOrderDetail[4], productPrice, 'Error: Missing or Invalid Product Price')
+        assert.equal(consigneeOrderDetail[5], productQuantity, 'Error: Missing or Invalid Product Quantity')
+        assert.equal(consigneeOrderDetail[6], orderState, 'Error: Missing or Invalid State of Order')
+        assert.equal(consigneeOrderDetail[7], orderID, 'Error: Missing or Invalid OrderId')
+        assert.equal(consigneeOrderDetail[8], orderCreatedDate, 'Error: Missing or Invalid Created Date of Order')
+
+        assert.equal(ordersOfConsigner, orderID, 'Error: Invalid OrderId Colllection of Consigner')
+        assert.equal(consignerOrderDetail[0], consigner, 'Error: Missing or Invalid Consigner Message')
+        assert.equal(consignerOrderDetail[1], consignee, 'Error: Missing or Invalid Consignee Message')
+        assert.equal(consignerOrderDetail[2], productName, 'Error: Missing or Invalid Product Name')
+        assert.equal(consignerOrderDetail[3], productCode, 'Error: Missing or Invalid Product Code')
+        assert.equal(consignerOrderDetail[4], productPrice, 'Error: Missing or Invalid Product Price')
+        assert.equal(consignerOrderDetail[5], productQuantity, 'Error: Missing or Invalid Product Quantity')
+        assert.equal(consignerOrderDetail[6], orderState, 'Error: Missing or Invalid State of Order')
+        assert.equal(consignerOrderDetail[7], orderID, 'Error: Missing or Invalid OrderId')
+        assert.equal(consignerOrderDetail[8], orderCreatedDate, 'Error: Missing or Invalid Created Date of Order')
+    })
+
+    it('2. Testing smart contract function convertOrdersIntoLogisicsByConsigners() that allows consigners to convert orders into logisics and Testing searching for logistics details', async () => {
+        var eventEmitted = false
+
+        var event = logisticsChain.DeliveredByConsigner()
+        await event.watch((err, res) => {
+            eventEmitted = true
+            orderState = 1
+        })
+
+        await logisticsChain.convertOrdersIntoLogisicsByConsigners(orderID, transportCompany, { from: consigner })
+
+        // check the change of orders' state
+        const consigneeOrderDetail = await logisticsChain.searchForOrderDetails.call(orderID, { from: consignee })
+        const consignerOrderDetail = await logisticsChain.searchForOrderDetails.call(orderID, { from: consigner })
+        
+        assert.equal(consigneeOrderDetail[6], orderState, 'Error: Invalid State of Order')
+        assert.equal(consignerOrderDetail[6], orderState, 'Error: Invalid State of Order')
+
+        // check the generation of logistics
+        const logisticsOfConsignee = await logisticsChain.searchForLogisticsOfConsignee.call(consignee)
+        const logisticsOfConsigner = await logisticsChain.searchForLogisticsOfConsigner.call(consigner)
+
+        assert.equal(logisticsOfConsignee, logisticsID, 'Error: Invalid LogisticsId Colllection of Consigee')
+        assert.equal(logisticsOfConsigner, logisticsID, 'Error: Invalid LogisticsId Colllection of Consiger')
+
+        // check logistics details
+        const consigneeLogisticsDetail = await logisticsChain.searchForLogisticsDetails.call(logisticsID, { from: consignee })
+        const consignerLogisticsDetail = await logisticsChain.searchForLogisticsDetails.call(logisticsID, { from: consigner })
+
+        assert.equal(consigneeLogisticsDetail[0], consigner, 'Error: Missing or Invalid Consigner Message')
+        assert.equal(consigneeLogisticsDetail[1], consignee, 'Error: Missing or Invalid Consignee Message')
+        assert.equal(consigneeLogisticsDetail[2], transportCompany, 'Error: Missing or Invalid Transport Company Message')
+        assert.equal(consigneeLogisticsDetail[3], productName, 'Error: Missing or Invalid Product Name')
+        assert.equal(consigneeLogisticsDetail[4], productCode, 'Error: Missing or Invalid Product Code')
+        assert.equal(consigneeLogisticsDetail[5], productPrice, 'Error: Missing or Invalid Product Price')
+        assert.equal(consigneeLogisticsDetail[6], productQuantity, 'Error: Missing or Invalid Product Quantity')
+        assert.equal(consigneeLogisticsDetail[7], [], 'Error: Missing or Invalid Transfer Stations Message')
+        assert.equal(consigneeLogisticsDetail[8], logisticsState, 'Error: Missing or Invalid State of Logistics')
+        assert.equal(consigneeLogisticsDetail[9], 0, 'Error: Missing or Invalid Current Transfer Station Message')
+        assert.equal(consigneeLogisticsDetail[10], logisticsID, 'Error: Missing or Invalid LogisticsId')
+
+        assert.equal(consignerLogisticsDetail[0], consigner, 'Error: Missing or Invalid Consigner Message')
+        assert.equal(consignerLogisticsDetail[1], consignee, 'Error: Missing or Invalid Consignee Message')
+        assert.equal(consignerLogisticsDetail[2], transportCompany, 'Error: Missing or Invalid Transport Company Message')
+        assert.equal(consignerLogisticsDetail[3], productName, 'Error: Missing or Invalid Product Name')
+        assert.equal(consignerLogisticsDetail[4], productCode, 'Error: Missing or Invalid Product Code')
+        assert.equal(consignerLogisticsDetail[5], productPrice, 'Error: Missing or Invalid Product Price')
+        assert.equal(consignerLogisticsDetail[6], productQuantity, 'Error: Missing or Invalid Product Quantity')
+        assert.equal(consignerLogisticsDetail[7], [], 'Error: Missing or Invalid Transfer Stations Message')
+        assert.equal(consignerLogisticsDetail[8], logisticsState, 'Error: Missing or Invalid State of Logistics')
+        assert.equal(consignerLogisticsDetail[9], 0, 'Error: Missing or Invalid Current Transfer Station Message')
+        assert.equal(consignerLogisticsDetail[10], logisticsID, 'Error: Missing or Invalid LogisticsId')
     })
     
+    it("3. Testing smart contract function collectProductByTransportCompany() that allows transport company to collect the project", async() => {
+        var eventEmitted = false
+
+        var event = logisticsChain.CollectedByTransportCompany()
+        await event.watch((err, res) => {
+            eventEmitted = true
+            logisticsState = 4
+        })
+
+        await logisticsChain.collectProductByTransportCompany(logisticsID, { from: transportCompany })
+
+        // check the change of logistics' state
+        const consigneeLogisticsDetail = await logisticsChain.searchForLogisticsDetails.call(logisticsID, { from: consignee })
+        
+        assert.equal(consigneeLogisticsDetail[8], logisticsState, 'Error: Invalid State of Logistics')
+    })
 });
