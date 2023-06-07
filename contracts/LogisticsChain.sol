@@ -20,6 +20,8 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     mapping(uint256 => Structure.LogisticsDetails) logistics; // lid->logisticsdetails
     //mapping(address => Structure.OrderDetails[]) consigneeOrders;  // the orders from the consignee
     //mapping(address => Structure.OrderDetails[]) consignerOrders;  // the orders to the consigner
+    mapping(address => Structure.OrderHistory) orderHistory; // address->finishedorder[]
+    mapping(address => Structure.LogisticsHistory) logisticsHistory; // address->finishedlogistics[]
 
     function hasConsigneeRole(address _account) public view returns (bool) {
         require(_account != address(0));
@@ -178,7 +180,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     2nd step in logisticschain
     Allows transport company to collect
     */
-    function collectProductByTransportCompany(uint _lid) public 
+    function collectProductByTransportCompany(uint256 _lid) public 
     onlyTransportCompany()
     deliveredByConsigner(_lid)
     verifyCaller(logistics[_lid].TransportCompany)
@@ -188,6 +190,83 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         emit CollectedByTransportCompany(_lid);
     }
 
+    /*
+    3rd step in logisticschain
+    update tranferstations and allow company to update logistic status to inTransit 
+    */
+    function transferProductByTransportCompany(uint256 _lid, address[] memory stations) public 
+    onlyTransportCompany()
+    deliveredByConsigner(_lid)
+    verifyCaller(logistics[_lid].TransportCompany)
+    {
+        bool stationsExist = true;
+        for (uint i = 0; i < stations.length; i++) {
+            if (!hasTransferStationRole(stations[i])) {
+                stationsExist = false;
+            }
+        }
+        if (stationsExist) {
+            logistics[_lid].TransferStations = stations; // update TransferStations
+            // update state product begins to transfer
+            logistics[_lid].state = Structure.State.InTransit;
+            emit InTransit(_lid);
+        } 
+
+    }
+
+    /*
+    4th step in logisticschain 
+    transferstation update logistics detail
+    */
+    function updateCurrentTransferStationByTransferStation(uint256 _lid) public
+    onlyTransferStation()
+    inTransit(_lid)
+    {
+        // get current station as index
+        uint256 StationIndex = logistics[_lid].CurrentTransferStations;
+        address[] memory stations = logistics[_lid].TransferStations;
+        require(StationIndex < stations.length);
+        // judge authority : next station address == msg.sender
+        require(msg.sender == stations[StationIndex]);
+        // update current station
+        logistics[_lid].CurrentTransferStations = StationIndex + 1;
+    }
+
+    /*
+    5th step in logisticschain
+    Product arrived in final station, transport company update logistics state to arrived
+    */
+    function arrivedProductByFinalTransferStation(uint256 _lid) public
+    onlyTransferStation()
+    inTransit(_lid)
+    {
+        uint256 StationIndex = logistics[_lid].CurrentTransferStations;
+        address[] memory stations = logistics[_lid].TransferStations;
+        // judge product has arrived final station
+        require(StationIndex == stations.length);
+        require(msg.sender == stations[StationIndex-1]);
+        // update logistics state to arrived
+        logistics[_lid].state = Structure.State.Arrived;
+        emit Arrived(_lid);
+    }
+
+    /*
+    6th step in logisticschain
+    Product arrived, and consignee can receive the product, add finished order to history
+    */
+    function orderFinishedByConsignee(uint256 _oid) public
+    onlyConsignee() 
+    orderProceeding(_oid)
+    arrived(_oid)
+    verifyCaller(orders[_oid].Consignee) 
+    verifyCaller(logistics[_oid].Consignee) 
+    {
+        orders[_oid].state = Structure.State.OrderFinished;
+        address consignee = orders[_oid].Consignee;
+        orderHistory[consignee].history.push(orders[_oid]);
+        logisticsHistory[consignee].history.push(logistics[_oid]);
+        emit OrderFinished(_oid);
+    }
 
 }
 
