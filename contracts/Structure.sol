@@ -2,12 +2,6 @@
 pragma solidity >=0.4.16 <0.9.0;
 
 library Structure {
-    struct Roles {
-        bool Consignee;
-        bool Consigner;
-        bool TransferStation;
-        bool TransportCompany;
-    }
     enum State {
         OrderCreated,
         OrderProceeding,
@@ -20,10 +14,10 @@ library Structure {
     struct OrderDetails {
         address Consigner;
         address Consignee;
-        string ProductDetails;
+        ProductDetails ProductDetails;
         State state;
         uint256 OrderId;
-        uint256 CreatedDate;
+        string CreatedDate;
     }
     struct ProductDetails {
         string ProductName;
@@ -35,7 +29,7 @@ library Structure {
         address Consigner;
         address Consignee;
         address TransportCompany;
-        string ProductDetails;
+        ProductDetails ProductDetails;
         address[] TransferStations;
         State state;
         uint256 CurrentTransferStations;

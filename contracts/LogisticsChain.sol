@@ -15,62 +15,15 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     Structure.LogisticsDetails public logisticsDetail;
     address owner;
 
-    mapping(address => Structure.Roles) roles;
     mapping(uint256 => Structure.OrderDetails) orders;  // oid->orderdetails
     mapping(uint256 => Structure.LogisticsDetails) logistics; // lid->logisticsdetails
-    //mapping(address => Structure.OrderDetails[]) consigneeOrders;  // the orders from the consignee
-    //mapping(address => Structure.OrderDetails[]) consignerOrders;  // the orders to the consigner
+    mapping(address => uint256[]) consigneeOrders;  // the ordersID from the consignee
+    mapping(address => uint256[]) consignerOrders;  // the ordersID to the consigner
+    mapping(address => uint256[]) consigneeLogistics;  // the logisticsID to the consignee
+    mapping(address => uint256[]) consignerLogistics;  // the logisticsID from the consigner
     mapping(address => Structure.OrderHistory) orderHistory; // address->finishedorder[]
     mapping(address => Structure.LogisticsHistory) logisticsHistory; // address->finishedlogistics[]
-
-    function hasConsigneeRole(address _account) public view returns (bool) {
-        require(_account != address(0));
-        return roles[_account].Consignee;
-    }
-
-    function addConsigneeRole(address _account) public {
-        require(_account != address(0));
-        require(!hasConsigneeRole(_account));
-
-        roles[_account].Consignee = true;
-    }
     
-    function hasConsignerRole(address _account) public view returns (bool) {
-        require(_account != address(0));
-        return roles[_account].Consigner;
-    }
-
-    function addConsignerRole(address _account) public {
-        require(_account != address(0));
-        require(!hasConsignerRole(_account));
-
-        roles[_account].Consigner = true;
-    }
-
-    function hasTransferStationRole(address _account) public view returns (bool) {
-        require(_account != address(0));
-        return roles[_account].TransferStation;
-    }
-
-    function addTransferStationRole(address _account) public {
-        require(_account != address(0));
-        require(!hasTransferStationRole(_account));
-
-        roles[_account].TransferStation = true;
-    }
-
-    function hasTransportCompanyRole(address _account) public view returns (bool) {
-        require(_account != address(0));
-        return roles[_account].TransportCompany;
-    }
-
-    function addTransportCompanyRole(address _account) public {
-        require(_account != address(0));
-        require(!hasTransportCompanyRole(_account));
-
-        roles[_account].TransportCompany = true;
-    }
-
     constructor() public payable {
         owner = msg.sender;
     }
@@ -85,31 +38,19 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     event InTransit(uint256 lid);
     event Arrived(uint256 lid);
 
-    // initialize some orders from the consignee
-    function initOrdersForConsignee(Structure.OrderDetails memory order) public onlyConsignee{
-      //consigneeOrders[_uid].push(order);
-      oid = order.OrderId;
-      orders[oid] = order;
-
-      emit OrderCreated(oid);
-    }
-
-    // initialize some orders to the consigner
-    /*
-    function initOrdersForConsigner(Structure.OrderDetails memory order, address _uid) public onlyConsigner{
-      consignerOrders[_uid].push(order);
-    }
-    */
-
     // checks to see if msg.sender == owner of the contract
     modifier verifyAddress(address add) {
         require(msg.sender == add);
         _;
     }
 
-    // Define a modifer that verifies the Caller
-    modifier verifyCaller (address _address) {
-        require(msg.sender == _address);
+    modifier orderBelongsToCaller(uint _oid) {
+        require(orders[_oid].Consigner == msg.sender || orders[_oid].Consignee == msg.sender);
+        _;
+    }
+
+    modifier logisticsBelongsToCaller(uint _lid) {
+        require(logistics[_lid].Consigner == msg.sender || logistics[_lid].Consignee == msg.sender || logistics[_lid].TransportCompany == msg.sender || logistics[_lid].TransferStation == msg.sender);
         _;
     }
 
@@ -148,15 +89,139 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         _;
     }
 
+    // declare a function to search for all the orders of the consigner
+    function searchForOrdersOfConsigner(address _add) public view returns(uint256[] memory orderId)
+    {
+        uint256[] memory ordersOfConsigner = consignerOrders[_add];
+        return orders;
+    }
+
+    // declare a function to search for all the orders of the consignee
+    function searchForOrdersOfConsignee(address _add) public view returns(uint256[] memory orderID) {
+        uint256[] memory ordersOfConsignee = consigneeOrders[_add];
+        return orders;
+    }
+    
+    // declare a function to search fo all the logistics of the consigner
+    function searchForLogisticsOfConsigner(address _add) public view returns(uint256[] memory logisticsID) {
+        uint256[] memory logisticsOfConsigner = consignerLogistics[_add];
+        return logistics;
+    }
+
+    // declare a function to search fo all the logistics of the consignee
+    function searchForLogisticsOfConsignee(address _add) public view returns(uint256[] memory logisticsID) {
+        uint256[] memory logisticsOfConsignee = consigneeLogistics[_add];
+        return logistics;
+    }
+
+    // declare a function to search for specific order
+    function searchForOrderDetails(uint256 _oid) public orderBelongsToCaller(_oid) view returns
+    (   
+        address Consigner,
+        address Consignee,
+        string memory ProductName,
+        uint256 ProductCode,
+        uint256 ProductPrice,
+        uint256 ProductQuantity,
+        Structure.State state,
+        uint256 OrderId,
+        string memory CreatedDate
+    )
+    {
+        orderDetail = orders[_oid];
+        return 
+        (
+            orderDetail.Consigner, 
+            orderDetail.Consignee,
+            orderDetail.ProductDetails.ProductName,
+            orderDetail.ProductDetails.ProductCode,
+            orderDetail.ProductDetails.ProductPrice,
+            orderDetail.ProductDetails.ProductQuantity,
+            orderDetail.state,
+            orderDetail.OrderId,
+            orderDetail.CreatedDate
+        );
+    }
+
+    // declare a function to search for specific logistics
+    function searchForLogisticsDetails(uint256 _lid) public logisticsBelongsToCaller(_lid) view returns
+    (
+        address Consigner,
+        address Consignee,
+        address TransportCompany,
+        string memory ProductName,
+        uint256 ProductCode,
+        uint256 ProductPrice,
+        uint256 ProductQuantity,
+        address[] memory TransferStations,
+        Structure.State state,
+        uint256 CurrentTransferStations,
+        uint256 LogisticsId
+    ) 
+    {
+        logisticsDetail = logistics[_lid];
+        return
+        (
+            logisticsDetail.Consigner,
+            logisticsDetail.Consignee,
+            logisticsDetail.TransportCompany,
+            logisticsDetail.ProductDetails.ProductName,
+            logisticsDetail.ProductDetails.ProductCode,
+            logisticsDetail.ProductDetails.ProductPrice,
+            logisticsDetail.ProductDetails.ProductQuantity,
+            logisticsDetail.TransferStations,
+            logisticsDetail.state,
+            logisticsDetail.CurrentTransferStations,
+            logisticsDetail.LogisticsId
+        );
+    }
+
     /*
     1st step in logisticschain
+    Allows consignees to create some orders
+    */
+    function initOrdersForConsignee
+    (
+        address _Consigner,
+        address _Consignee,
+        string memory _ProductName,
+        uint256 _ProductCode,
+        uint256 _ProductPrice,
+        uint256 _ProductQuantity,
+        uint256 _state,
+        uint256 _OrderId,
+        string memory _CreatedDate
+    ) public onlyConsignee {
+        require(_state == 0);
+        Structure.OrderDetails memory order;
+        Structure.ProductDetails memory product;
+        product.ProductName = _ProductName;
+        product.ProductCode = _ProductCode;
+        product.ProductPrice = _ProductPrice;
+        product.ProductQuantity = _ProductQuantity;
+        order.Consigner = _Consigner;
+        order.Consignee = _Consignee;
+        order.ProductDetails = product;
+        order.state = Structure.State.OrderCreated;
+        order.OrderId = _OrderId;
+        order.CreatedDate = _CreatedDate;
+        orders[oid] = order;
+        consigneeOrders[msg.sender].push(oid);
+        address consigner = order.Consigner;
+        consignerOrders[consigner].push(oid);
+
+        emit OrderCreated(oid);
+    }
+
+    /*
+    2nd step in logisticschain
     Allows consigners to convert orders into logisics
     */
     function convertOrdersIntoLogisicsByConsigners(uint256 _oid, address _TransportCompany) public 
     onlyConsigner() 
     orderCreated(_oid) 
-    verifyCaller(orders[_oid].Consigner) 
     {   
+
         orders[_oid].state = Structure.State.OrderProceeding;  // change the state of the order
         emit OrderProceeding(_oid);
 
@@ -177,13 +242,12 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     /*
-    2nd step in logisticschain
+    3rd step in logisticschain
     Allows transport company to collect
     */
-    function collectProductByTransportCompany(uint256 _lid) public 
+    function collectProductByTransportCompany(uint _lid) public 
     onlyTransportCompany()
     deliveredByConsigner(_lid)
-    verifyCaller(logistics[_lid].TransportCompany)
     {
         logistics[_lid].state = Structure.State.CollectedByTransportCompany;  // change the state of the logistics
 
@@ -191,7 +255,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     /*
-    3rd step in logisticschain
+    4th step in logisticschain
     update tranferstations and allow company to update logistic status to inTransit 
     */
     function transferProductByTransportCompany(uint256 _lid, address[] memory stations) public 
@@ -215,7 +279,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     /*
-    4th step in logisticschain 
+    5th step in logisticschain 
     transferstation update logistics detail
     */
     function updateCurrentTransferStationByTransferStation(uint256 _lid) public
@@ -233,7 +297,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     /*
-    5th step in logisticschain
+    6th step in logisticschain
     Product arrived in final station, transport company update logistics state to arrived
     */
     function arrivedProductByFinalTransferStation(uint256 _lid) public
@@ -251,7 +315,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     /*
-    6th step in logisticschain
+    7th step in logisticschain
     Product arrived, and consignee can receive the product, add finished order to history
     */
     function orderFinishedByConsignee(uint256 _oid) public

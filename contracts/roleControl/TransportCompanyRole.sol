@@ -2,9 +2,10 @@ pragma solidity >=0.4.16 <0.9.0;
 
 // Import the library 'Roles'
 import "./Roles.sol";
+import "../logisticsCore/Ownable.sol";
 
 // Define a contract 'transport_companyRole' to manage this role - add, remove, check
-contract TransportCompanyRole{
+contract TransportCompanyRole is Ownable{
   using Roles for Roles.Role;
 
   // Define 2 events, one for Adding, and other for Removing
@@ -31,12 +32,12 @@ contract TransportCompanyRole{
   }
 
   // add the role
-  function addTransportCompany(address account) public onlyTransportCompany {
+  function addTransportCompany(address account) public onlyOwner {
     _addTransportCompany(account);
   }
 
   // renounce this role
-  function renounceTransportCompany() public {
+  function renounceTransportCompany() public onlyOwner {
     _removeTransportCompany(msg.sender);
   }
 
