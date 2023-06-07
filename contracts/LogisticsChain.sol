@@ -84,7 +84,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     event Arrived(uint256 lid);
 
     // initialize some orders from the consignee
-    function initOrdersForConsignee(Structure.OrderDetails memory order, address _uid) public onlyConsignee{
+    function initOrdersForConsignee(Structure.OrderDetails memory order) public onlyConsignee{
       //consigneeOrders[_uid].push(order);
       oid = order.OrderId;
       orders[oid] = order;
@@ -183,7 +183,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     deliveredByConsigner(_lid)
     verifyCaller(logistics[_lid].TransportCompany)
     {
-        logistics[_lid].state = Structure.State.CollectedByTransportCompany;
+        logistics[_lid].state = Structure.State.CollectedByTransportCompany;  // change the state of the logistics
 
         emit CollectedByTransportCompany(_lid);
     }
