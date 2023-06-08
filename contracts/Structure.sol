@@ -14,7 +14,7 @@ library Structure {
     struct OrderDetails {
         address Consigner;
         address Consignee;
-        ProductDetails ProductDetails;
+        ProductDetails Productdetails;
         State state;
         uint256 OrderId;
         string CreatedDate;
@@ -29,7 +29,7 @@ library Structure {
         address Consigner;
         address Consignee;
         address TransportCompany;
-        ProductDetails ProductDetails;
+        ProductDetails Productdetails;
         address[] TransferStations;
         State state;
         uint256 CurrentTransferStations;

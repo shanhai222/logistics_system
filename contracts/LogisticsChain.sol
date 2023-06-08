@@ -133,10 +133,10 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         (
             orderDetail.Consigner, 
             orderDetail.Consignee,
-            orderDetail.ProductDetails.ProductName,
-            orderDetail.ProductDetails.ProductCode,
-            orderDetail.ProductDetails.ProductPrice,
-            orderDetail.ProductDetails.ProductQuantity,
+            orderDetail.Productdetails.ProductName,
+            orderDetail.Productdetails.ProductCode,
+            orderDetail.Productdetails.ProductPrice,
+            orderDetail.Productdetails.ProductQuantity,
             orderDetail.state,
             orderDetail.OrderId,
             orderDetail.CreatedDate
@@ -165,10 +165,10 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
             logisticsDetail.Consigner,
             logisticsDetail.Consignee,
             logisticsDetail.TransportCompany,
-            logisticsDetail.ProductDetails.ProductName,
-            logisticsDetail.ProductDetails.ProductCode,
-            logisticsDetail.ProductDetails.ProductPrice,
-            logisticsDetail.ProductDetails.ProductQuantity,
+            logisticsDetail.Productdetails.ProductName,
+            logisticsDetail.Productdetails.ProductCode,
+            logisticsDetail.Productdetails.ProductPrice,
+            logisticsDetail.Productdetails.ProductQuantity,
             logisticsDetail.TransferStations,
             logisticsDetail.state,
             logisticsDetail.CurrentTransferStations,
@@ -201,7 +201,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         product.ProductQuantity = _ProductQuantity;
         order.Consigner = _Consigner;
         order.Consignee = _Consignee;
-        order.ProductDetails = product;
+        order.Productdetails = product;
         order.state = Structure.State.OrderCreated;
         order.OrderId = _OrderId;
         order.CreatedDate = _CreatedDate;
@@ -231,7 +231,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         one_logistics.Consigner = orderDetail.Consigner;
         one_logistics.Consignee = orderDetail.Consignee;
         one_logistics.TransportCompany = _TransportCompany;
-        one_logistics.ProductDetails = orderDetail.ProductDetails;
+        one_logistics.Productdetails = orderDetail.Productdetails;
         one_logistics.TransferStations = new address[](0);
         one_logistics.state = Structure.State.DeliveredByConsigner;
         one_logistics.CurrentTransferStations = 0;
