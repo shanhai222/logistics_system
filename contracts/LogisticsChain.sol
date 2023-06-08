@@ -205,12 +205,12 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         order.state = Structure.State.OrderCreated;
         order.OrderId = _OrderId;
         order.CreatedDate = _CreatedDate;
-        orders[oid] = order;
-        consigneeOrders[msg.sender].push(oid);
+        orders[_OrderId] = order;
+        consigneeOrders[msg.sender].push(_OrderId);
         address consigner = order.Consigner;
-        consignerOrders[consigner].push(oid);
+        consignerOrders[consigner].push(_OrderId);
 
-        emit OrderCreated(oid);
+        emit OrderCreated(_OrderId);
     }
 
     /*
@@ -222,7 +222,6 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     orderCreated(_oid) 
     orderBelongsToCaller(_oid)
     {   
-
         orders[_oid].state = Structure.State.OrderProceeding;  // change the state of the order
         emit OrderProceeding(_oid);
 
