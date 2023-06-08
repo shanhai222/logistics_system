@@ -90,30 +90,43 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     // declare a function to search for all the orders of the consigner
-    function searchForOrdersOfConsigner(address _add) public view returns(uint256[] memory orderId)
-    {
-        uint256[] memory ordersOfConsigner = consignerOrders[_add];
-        return ordersOfConsigner;
+    function searchForOrdersOfCaller(address _add) public view returns(uint256[] memory orderId)
+    {   
+        uint256[] memory ordersOfCaller;
+        if (isConsigner(_add)){
+            ordersOfCaller = consignerOrders[_add];
+        }else if (isConsignee(_add)) {
+            ordersOfCaller = consigneeOrders[_add];
+        }
+        
+        return ordersOfCaller;
     }
 
     // declare a function to search for all the orders of the consignee
+    /*
     function searchForOrdersOfConsignee(address _add) public view returns(uint256[] memory orderID) {
         uint256[] memory ordersOfConsignee = consigneeOrders[_add];
         return ordersOfConsignee;
     }
-    
+    */
     // declare a function to search fo all the logistics of the consigner
-    function searchForLogisticsOfConsigner(address _add) public view returns(uint256[] memory logisticsID) {
-        uint256[] memory logisticsOfConsigner = consignerLogistics[_add];
-        return logisticsOfConsigner;
+    function searchForLogisticsOfCaller(address _add) public view returns(uint256[] memory logisticsID) {
+        uint256[] memory logisticsOfCaller;
+        if (isConsigner(_add)){
+            logisticsOfCaller = consignerLogistics[_add];
+        }else if (isConsignee(_add)) {
+            logisticsOfCaller = consigneeLogistics[_add];
+        }
+        return logisticsOfCaller;
     }
 
     // declare a function to search fo all the logistics of the consignee
+    /*
     function searchForLogisticsOfConsignee(address _add) public view returns(uint256[] memory logisticsID) {
         uint256[] memory logisticsOfConsignee = consigneeLogistics[_add];
         return logisticsOfConsignee;
     }
-
+    */
     // declare a function to search for specific order
     function searchForOrderDetails(uint256 _oid) public orderBelongsToCaller(_oid) returns
     (   
@@ -125,7 +138,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         uint256 ProductQuantity,
         Structure.State state,
         uint256 OrderId,
-        string memory CreatedDate
+        uint256 CreatedDate
     )
     {
         orderDetail = orders[_oid];
@@ -190,7 +203,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         uint256 _ProductQuantity,
         uint256 _state,
         uint256 _OrderId,
-        string memory _CreatedDate
+        uint256 _CreatedDate
     ) public onlyConsignee {
         require(_state == 0);
         Structure.OrderDetails memory order;

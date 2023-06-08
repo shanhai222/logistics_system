@@ -22,7 +22,7 @@ contract('LogisticsChain', function(accounts) {
     var logisticsID = 1
     var orderState = 0
     var logisticsState = 3
-    const orderCreatedDate = "2023-6-2"
+    const orderCreatedDate = 20230602
 
     console.log("<----------------ACCOUNTS----------------> ")
     console.log("Contract Owner: ", ownerID)
@@ -92,8 +92,8 @@ contract('LogisticsChain', function(accounts) {
         await logisticsChain.initOrdersForConsignee(consigner,consignee,productName,productCode,productPrice,productQuantity,orderState,orderID,orderCreatedDate,{ from: consignee })
 
         // Retrieve the just now saved item from blockchain by calling function
-        const ordersOfConsignee = await logisticsChain.searchForOrdersOfConsignee.call(consignee)
-        const ordersOfConsigner = await logisticsChain.searchForOrdersOfConsigner.call(consigner)
+        const ordersOfConsignee = await logisticsChain.searchForOrdersOfCaller.call(consignee)
+        const ordersOfConsigner = await logisticsChain.searchForOrdersOfCaller.call(consigner)
         
         const consigneeOrderDetail = await logisticsChain.searchForOrderDetails.call(orderID, { from: consignee })
         const consignerOrderDetail = await logisticsChain.searchForOrderDetails.call(orderID, { from: consigner })
@@ -151,8 +151,8 @@ contract('LogisticsChain', function(accounts) {
         assert.equal(consignerOrderDetail[6], orderState, 'Error: Invalid State of Order')
 
         // check the generation of logistics
-        const logisticsOfConsignee = await logisticsChain.searchForLogisticsOfConsignee.call(consignee)
-        const logisticsOfConsigner = await logisticsChain.searchForLogisticsOfConsigner.call(consigner)
+        const logisticsOfConsignee = await logisticsChain.searchForLogisticsOfCaller.call(consignee)
+        const logisticsOfConsigner = await logisticsChain.searchForLogisticsOfCaller.call(consigner)
 
         assert.equal(logisticsOfConsignee, logisticsID, 'Error: Invalid LogisticsId Colllection of Consigee')
         assert.equal(logisticsOfConsigner, logisticsID, 'Error: Invalid LogisticsId Colllection of Consiger')

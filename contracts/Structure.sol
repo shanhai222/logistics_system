@@ -17,7 +17,7 @@ library Structure {
         ProductDetails Productdetails;
         State state;
         uint256 OrderId;
-        string CreatedDate;
+        uint256 CreatedDate;
     }
     struct ProductDetails {
         string ProductName;
