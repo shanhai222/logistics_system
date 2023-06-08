@@ -11,8 +11,8 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
 
     uint256 public oid;  // orderId
     uint256 public lid;  // logisticsId
-    Structure.OrderDetails public orderDetail;
-    Structure.LogisticsDetails public logisticsDetail;
+    Structure.OrderDetails orderDetail;
+    Structure.LogisticsDetails logisticsDetail;
     address owner;
 
     mapping(uint256 => Structure.OrderDetails) orders;  // oid->orderdetails
@@ -115,7 +115,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     // declare a function to search for specific order
-    function searchForOrderDetails(uint256 _oid) public orderBelongsToCaller(_oid) view returns
+    function searchForOrderDetails(uint256 _oid) public orderBelongsToCaller(_oid) returns
     (   
         address Consigner,
         address Consignee,
@@ -144,7 +144,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     // declare a function to search for specific logistics
-    function searchForLogisticsDetails(uint256 _lid) public logisticsBelongsToCaller(_lid) view returns
+    function searchForLogisticsDetails(uint256 _lid) public logisticsBelongsToCaller(_lid) returns
     (
         address Consigner,
         address Consignee,

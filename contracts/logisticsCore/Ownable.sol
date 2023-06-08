@@ -25,7 +25,7 @@ contract Ownable {
     * @dev Look up the address of the owner.
     * @return the address of the owner.
     */
-    function owner() public view returns (address) {
+    function Owner() public view returns (address) {
         return origOwner;
     }
 
