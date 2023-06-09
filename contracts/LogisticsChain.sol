@@ -102,13 +102,6 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         return ordersOfCaller;
     }
 
-    // declare a function to search for all the orders of the consignee
-    /*
-    function searchForOrdersOfConsignee(address _add) public view returns(uint256[] memory orderID) {
-        uint256[] memory ordersOfConsignee = consigneeOrders[_add];
-        return ordersOfConsignee;
-    }
-    */
     // declare a function to search fo all the logistics of the consigner
     function searchForLogisticsOfCaller(address _add) public view returns(uint256[] memory logisticsID) {
         uint256[] memory logisticsOfCaller;
@@ -120,13 +113,6 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         return logisticsOfCaller;
     }
 
-    // declare a function to search fo all the logistics of the consignee
-    /*
-    function searchForLogisticsOfConsignee(address _add) public view returns(uint256[] memory logisticsID) {
-        uint256[] memory logisticsOfConsignee = consigneeLogistics[_add];
-        return logisticsOfConsignee;
-    }
-    */
     // declare a function to search for specific order
     function searchForOrderDetails(uint256 _oid) public orderBelongsToCaller(_oid) returns
     (   

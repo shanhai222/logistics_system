@@ -145,10 +145,10 @@ App = {
 
         switch(processId) {
             case 1:
-                return await App.addConsignee(event);
+                return await App.addConsigner(event);
                 break;
             case 2:
-                return await App.addConsigner(event);
+                return await App.addConsignee(event);
                 break;
             case 3:
                 return await App.addTransportCompany(event);
@@ -156,12 +156,13 @@ App = {
             case 4:
                 return await App.addTransferStation(event);
                 break;
+
             case 5:
-                return await App.searchForOrdersOfCaller(event);
+                return await App.initOrdersForConsignee(event);
                 break;
 
             case 6:
-                return await App.searchForLogisticsOfCaller(event);
+                return await App.searchForOrdersOfCaller(event);
                 break;
 
             case 7:
@@ -169,15 +170,15 @@ App = {
                 break;
 
             case 8:
-                return await App.searchForLogisticsDetails(event);
+                return await App.convertOrdersIntoLogisicsByConsigners(event);
                 break;
 
             case 9:
-                return await App.initOrdersForConsignee(event);
+                return await App.searchForLogisticsOfCaller(event);
                 break;
 
             case 10:
-                return await App.convertOrdersIntoLogisicsByConsigners(event);
+                return await App.searchForLogisticsDetails(event);
                 break;
 
             case 11:
@@ -235,6 +236,7 @@ App = {
 
         });
     },
+
     //2
     addConsignee: function(event) {
         event.preventDefault();
@@ -270,13 +272,14 @@ App = {
     // you add 
 
 
-    //
+    //5
     initOrdersForConsignee: function (event) {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("initOrder");
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
+            var orderDate = new Date();
             return instance.initOrdersForConsignee(
                 App.consigner,
                 App.consignee,
@@ -284,9 +287,9 @@ App = {
                 App.productCode,
                 App.productPrice,
                 App.productQuantity,
-                
+                0,
                 App.orderID,
-                
+                orderDate,
                 {from: App.consigner, gas:3000000}
             );
         }).then(function(result) {
@@ -298,9 +301,11 @@ App = {
         });
     },
 
-    // 
+    //6
     searchForOrdersOfCaller: function () {
-        var displayTo = document.getElementById("searchResult");
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var displayTo = document.getElementById("searchResult1");
         var caller = $('#caller1').val();
         App.contracts.LogisticsChain.deployed().then(function(instance) {
           return instance.searchForOrdersOfCaller(caller);
@@ -320,32 +325,12 @@ App = {
         });
     },
 
-    // 
-    searchForLogisticsOfCaller: function () {
-        var displayTo = document.getElementById("searchResult");
-        var caller = $('#caller1').val();
-        App.contracts.LogisticsChain.deployed().then(function(instance) {
-          return instance.searchForLogisticsOfCaller(caller);
-        }).then(function(result) {
-          while (displayTo.firstChild) {
-              displayTo.removeChild(displayTo.firstChild);
-          }
-
-          let html = '';
-          displayTo.innerHTML = (
-            resultTag.forEach((item) => {
-                html += "Logistics ID: "+result[0]+"<br>";
-            }));
-
-        }).catch(function(err) {
-          console.log(err.message);
-        });
-    },
-
-    //
+    //7
     searchForOrderDetails: function () {
-        var displayTo = document.getElementById("searchResult");
-        var caller = $('#caller1').val();
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var displayTo = document.getElementById("searchResult2");
+        var orderId = $('#orderID1').val();
         App.contracts.LogisticsChain.deployed().then(function(instance) {
           return instance.searchForOrderDetails(caller);
         }).then(function(result) {
@@ -371,12 +356,61 @@ App = {
         });
     },
 
-    //
-    searchForLogisticsDetails: function () {
-        var displayTo = document.getElementById("searchResult");
-        var caller = $('#caller1').val();
+    //8
+    convertOrdersIntoLogisicsByConsigners: function(event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var resultTag = document.getElementById("coil");
+        var oid = $("#orderID2").val();
+        var transportCompany = $("#tp").val();
+        App.contracts.SupplyChain.deployed().then(function(instance) {
+            resultTag.className = " loader";
+            return instance.convertOrdersIntoLogisicsByConsigners(
+                oid,
+                transportCompany,
+                {from: App.consigner, gas:3000000}
+            );
+        }).then(function(result) {
+            resultTag.className = " font";
+            resultTag.innerText = "  Tx Hash: "+result.tx;
+        }).catch(function(err) {
+          resultTag.className = " font";
+          resultTag.innerText = "  Error: "+err.message;
+        });
+    },
+
+    //9
+    searchForLogisticsOfCaller: function () {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var displayTo = document.getElementById("searchResult3");
+        var caller = $('#caller2').val();
         App.contracts.LogisticsChain.deployed().then(function(instance) {
-          return instance.searchForLogisticsDetails(caller);
+          return instance.searchForLogisticsOfCaller(caller);
+        }).then(function(result) {
+          while (displayTo.firstChild) {
+              displayTo.removeChild(displayTo.firstChild);
+          }
+
+          let html = '';
+          displayTo.innerHTML = (
+            resultTag.forEach((item) => {
+                html += "Logistics ID: "+result[0]+"<br>";
+            }));
+
+        }).catch(function(err) {
+          console.log(err.message);
+        });
+    },
+
+    //10
+    searchForLogisticsDetails: function () {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var displayTo = document.getElementById("searchResult4");
+        var lid = $('#logisticsID1').val();
+        App.contracts.LogisticsChain.deployed().then(function(instance) {
+          return instance.searchForLogisticsDetails(lid);
         }).then(function(result) {
           while (displayTo.firstChild) {
               displayTo.removeChild(displayTo.firstChild);
@@ -393,13 +427,36 @@ App = {
           "Product Quantity: "+result[6]+"<br>"+
           "Transfer Stations: "+result[7]+"<br>"+
           "Logistics State: "+result[8]+"<br>"+
-          "CurrentTransferStation: "+result[9]+"<br>"+
-          "Logistics Id: "+result[10]);
+          "Current Transfer Station: "+result[9]+"<br>"+
+          "Logistics ID"+result[10]);
 
         }).catch(function(err) {
           console.log(err.message);
         });
     },
 
+    //11
+    collectProductByTransportCompany: function (event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var displayTo = document.getElementById("cp");
+        var lid = $('#logisticsID2').val();
+        App.contracts.SupplyChain.deployed().then(function(instance) {
+            resultTag.className = " loader";
+            return instance.collectProductByTransportCompany(
+                lid,
+                {from: App.transportCompany, gas:3000000}
+            );
+        }).then(function(result) {
+            resultTag.className = " font";
+            resultTag.innerText = "  Tx Hash: "+result.tx;
+        }).catch(function(err) {
+          resultTag.className = " font";
+          resultTag.innerText = "  Error: "+err.message;
+        });
+    },
 
+    // you add
+
+    
 }

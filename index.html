@@ -7,10 +7,143 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
-<body>
+<body class = "font">
+    <h1>Logistics Chain</h1>
+  <div class = "step">
+    <p class = "step"> Step 1: Add Address to appropriate role</p>
+    <p class = "step"> If false, try again! </p>
+    <p class = "step" id = "divType"></p>
+    <div class = "outline"style = "height: 100px; display: flex;">
+        <button class = "button" data-id="1">Add Consigner</button>
+        <input id = "consigner" class = "inputFeilds">
+        <p id = "isConsigner" class = "inputFeilds"></p>
 
+    </div>
+
+    <div class = "outline" style = "height: 100px; display: flex;">
+        <button class = "button " data-id="2">Add Consignee</button>
+        <input id = "consignee" class = "inputFeilds">
+        <p id = "isConsignee" class = "inputFeilds"></p>
+    </div>
+
+    <!--you add-->
+
+    </div>
+</div>
+
+<div class = "step">
+    <p class = "step">Create Orders (ONLY CONSIGNEE)</p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p>Consigner:</p><input id = "consigner" class = "inputFeilds">
+            <p>Consignee:</p><input id = "consignee" class = "inputFeilds">
+            <p>Product Name:</p><input id = "productName" class = "inputFeilds">
+            <p>Product Code:</p><input id = "productCode" class = "inputFeilds">
+            <p>Product Price:</p><input id = "productPrice" class = "inputFeilds">
+            <p>Product Quantity:</p><input id = "productQuantity" class = "inputFeilds">
+        </div>
+    </div>
+    <div class = "outline" style="
+    margin: 1%;">
+        <button class = "button" data-id="5">Step 1: Create Orders By Consignee</button>
+        <p id = "initOrder" class = "font">
+        </p>
+    </div>
+</div>
+
+<div class = "step">
+    <p class = "step">Search for Orders(ID) (ONLY CONSIGNER AND CONSIGNEE)</p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p class = 'font'>Your Address:</p><input class = "inputFeilds" id = "caller1">
+        </div>
+    </div>
+    <div class = "outline" style="
+    margin: 1%;">
+        <button class = "button" data-id="6" style="height: 40px; margin: auto;">Search All Your Orders(ID)</button>
+    <div id = "searchResult1">
+    </div>
     
-</body>
+</div>
+
+<div class = "step">
+    <p class = "step">Search for Specific Order(ONLY CONSIGNER AND CONSIGNEE)</p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p class = 'font'>Order ID:</p><input class = "inputFeilds" id = "orderID1">
+        </div>
+    </div>
+    <div class = "outline" style="
+    margin: 1%;">
+        <button class = "button" data-id="7" style="height: 40px; margin: auto;">Search For Specific Order Content</button>
+    </div>
+    <div id = "searchResult2">
+    </div>
+    
+</div>
+
+
+<div class = "step">
+    <p class = "step">Deliver Product (ONLY CONSIGNER) </p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p>Order ID:</p><input id = "orderID2" class = "inputFeilds">
+            <p>Transport Company:</p><input id = "tp" class = "inputFeilds">
+        </div>
+    </div>
+    <div>
+    <div class = "outline" style="margin: 1%;">
+        <button class = "button" data-id="8"> Step 2: Convert Orders Into Logisics By Consigners</button>
+        <p id = "coil" class = "font"></p>
+    </div>
+  </div>
+</div>
+
+<div class = "step">
+    <p class = "step">Search for Logistics(ID)</p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p class = 'font'>Your Address:</p><input class = "inputFeilds" id = "caller2">
+        </div>
+    </div>
+    <div class = "outline" style="
+    margin: 1%;">
+        <button class = "button" data-id="9" style="height: 40px; margin: auto;">Search All Your Logistics(ID)</button>
+    <div id = "searchResult3">
+    </div>
+    
+</div>
+
+<div class = "step">
+    <p class = "step">Search for Specific Logistics</p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p class = 'font'>Logistics ID:</p><input class = "inputFeilds" id = "logisticsID1">
+        </div>
+    </div>
+    <div class = "outline" style="
+    margin: 1%;">
+        <button class = "button" data-id="10" style="height: 40px; margin: auto;">Search For Specific Logistics Content</button>
+    </div>
+    <div id = "searchResult4">
+    </div>
+    
+</div>
+
+<div class = "step">
+    <p class = "step">Collect Product (ONLY TRANSPORT COMPANY) </p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p>Logistics ID:</p><input id = "logisticsID2" class = "inputFeilds">
+        </div>
+    </div>
+    <div class = "outline" style="margin: 1%; display: flex;">
+        <button class = "button" data-id="11"> Step 3: Collect Product By Transport Company</button>
+        <p id = "cp" class = "font"></p>
+    </div>
+</div>
+
+<!--you add-->
 
 
 </html>
