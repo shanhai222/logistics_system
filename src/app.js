@@ -287,7 +287,6 @@ App = {
                 App.productCode,
                 App.productPrice,
                 App.productQuantity,
-                0,
                 App.orderID,
                 orderDate,
                 {from: App.consigner, gas:3000000}
@@ -458,5 +457,5 @@ App = {
 
     // you add
 
-    
+
 }

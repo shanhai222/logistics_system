@@ -187,11 +187,9 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         uint256 _ProductCode,
         uint256 _ProductPrice,
         uint256 _ProductQuantity,
-        uint256 _state,
         uint256 _OrderId,
         uint256 _CreatedDate
     ) public onlyConsignee {
-        require(_state == 0);
         Structure.OrderDetails memory order;
         Structure.ProductDetails memory product;
         product.ProductName = _ProductName;

@@ -89,7 +89,7 @@ contract('LogisticsChain', function(accounts) {
         })
         .on('error', console.error);
 
-        await logisticsChain.initOrdersForConsignee(consigner,consignee,productName,productCode,productPrice,productQuantity,orderState,orderID,orderCreatedDate,{ from: consignee })
+        await logisticsChain.initOrdersForConsignee(consigner,consignee,productName,productCode,productPrice,productQuantity,orderID,orderCreatedDate,{ from: consignee })
 
         // Retrieve the just now saved item from blockchain by calling function
         const ordersOfConsignee = await logisticsChain.searchForOrdersOfCaller.call(consignee)
