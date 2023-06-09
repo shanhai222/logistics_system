@@ -24,7 +24,6 @@ App = {
 
     readForm: function () {
         App.orderID = $("#orderID").val();
-        App.ownerID = $("#ownerID").val();
         App.consigner = $("#consigner").val();
         App.consignee = $("#consignee").val();
         App.productName = $("#productName").val();
