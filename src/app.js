@@ -11,9 +11,11 @@ App = {
     productQuantity: 0,
     productPrice: 0,
     transportCompany: "0x0000000000000000000000000000000000000000",
-    transferStation1: "0x0000000000000000000000000000000000000000",
-    transferStation2: "0x0000000000000000000000000000000000000000",
-    transferStation3: "0x0000000000000000000000000000000000000000",
+    // transferStation1: "0x0000000000000000000000000000000000000000",
+    // transferStation2: "0x0000000000000000000000000000000000000000",
+    // transferStation3: "0x0000000000000000000000000000000000000000",
+    transferStation: "0x0000000000000000000000000000000000000000",
+    transferStations: [],
 
 
     init: async function () {
@@ -24,31 +26,21 @@ App = {
 
     readForm: function () {
         App.orderID = $("#orderID").val();
-        App.ownerID = $("#ownerID").val();
         App.consigner = $("#consigner").val();
         App.consignee = $("#consignee").val();
         App.productName = $("#productName").val();
         App.productCode = $("#productCode").val();
         App.productQuantity = $("#productQuantity").val();
         App.productPrice = $("#productPrice").val();
-        App.transportCompany = $("#transportCompany").val();
-        App.transferStation1 = $("#transferStation1").val();
-        App.transferStation2 = $("#transferStation2").val();
-        App.transferStation3 = $("#transferStation3").val();
 
         console.log(
             App.orderID,
-            App.ownerID, 
             App.consigner, 
             App.consignee, 
             App.productName, 
             App.productCode, 
             App.productQuantity, 
             App.productPrice, 
-            App.transportCompany, 
-            App.transferStation1,
-            App.transferStation2,
-            App.transferStation3,
         );
     },
 
@@ -75,9 +67,9 @@ App = {
             App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
         }
 
-        App.getMetaskAccountID();
+        // App.getMetaskAccountID();
 
-        return App.initSupplyChain();
+        return App.initLogisticsChain();
     },
 
     getMetaskAccountID: function () {
@@ -111,9 +103,7 @@ App = {
             App.consignee = document.getElementById("consignee").value;
             App.consigner = document.getElementById("consigner").value;
             App.transportCompany = document.getElementById("transportCompany").value;
-            App.transferStation1 = document.getElementById("transferStation1").value;
-            App.transferStation2 = document.getElementById("transferStation2").value;
-            App.transferStation3 = document.getElementById("transferStation3").value;
+            App.transferStation = document.getElementById("transferStation").value;
           }
         })
     },
@@ -209,6 +199,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("isConsigner");
+        App.consigner = document.getElementById("consigner").value;
         App.contracts.LogisticsChain.deployed().then( async function(instance) {
             resultTag.className = " loader";
             var checkRole = await instance.isConsigner(App.consigner);
@@ -242,6 +233,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("isConsignee");
+        App.consignee = document.getElementById("consignee").value;
         App.contracts.LogisticsChain.deployed().then( async function(instance) {
             resultTag.className = " loader";
             var checkRole = await instance.isConsignee(App.consignee);
@@ -269,17 +261,87 @@ App = {
 
         });
     },
-    // you add 
+    
+    //3
+    addTransportCompany: function(event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var resultTag = document.getElementById("isTransportCompany");
+        App.transportCompany = document.getElementById("transportCompany").value;
+        App.contracts.LogisticsChain.deployed().then( async function(instance) {
+            resultTag.className = " loader";
+            var checkRole = await instance.isTransportCompany(App.transportCompany);
+            if (checkRole == false){
+              await instance.addTransportCompany(
+                   App.transportCompany,
+                  {from: App.metamaskAccountID, gas:3000000}
+              );
+            }
+            sleep(800);
+            checkRole = await instance.isTransportCompany(App.transportCompany);
+            return checkRole;
+        }).then(function(result) {
+            resultTag.className = " inputFeilds";
+            resultTag.innerText = result;
+            if (result == true){
+                resultTag.style.color = "green"
+            }else{
+                resultTag.style.color = "red"
 
+            }
+        }).catch(function(err) {
+          resultTag.className = " inputFeilds";
+          resultTag.innerText = "  Error: "+err.message;
+
+        });
+    },
+    // 4 
+    addTransferStation: function(event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var resultTag = document.getElementById("isTransferStation");
+        App.transferStation = document.getElementById("transferStation").value;
+        App.contracts.LogisticsChain.deployed().then( async function(instance) {
+            resultTag.className = " loader";
+            var checkRole = await instance.isTransferStation(App.transferStation);
+            if (checkRole == false){
+              await instance.addTransferStation(
+                   App.transferStation,
+                  {from: App.metamaskAccountID, gas:3000000}
+              );
+            }
+            sleep(800);
+            checkRole = await instance.isTransferStation(App.transferStation);
+            return checkRole;
+        }).then(function(result) {
+            resultTag.className = " inputFeilds";
+            resultTag.innerText = result;
+            if (result == true){
+                resultTag.style.color = "green";
+                // // empty input text
+                // resultTag.value = "";
+                // App.transferStation = "0x0000000000000000000000000000000000000000";
+            }else{
+                resultTag.style.color = "red"
+
+            }
+        }).catch(function(err) {
+          resultTag.className = " inputFeilds";
+          resultTag.innerText = "  Error: "+err.message;
+
+        });
+    },
 
     //5
     initOrdersForConsignee: function (event) {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("initOrder");
+        App.readForm();
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             var orderDate = new Date();
+            var Timestamp = Math.floor(orderDate.getTime() / 1000);
             return instance.initOrdersForConsignee(
                 App.consigner,
                 App.consignee,
@@ -288,8 +350,8 @@ App = {
                 App.productPrice,
                 App.productQuantity,
                 App.orderID,
-                orderDate,
-                {from: App.consigner, gas:3000000}
+                Timestamp,
+                {from: App.consignee, gas:3000000}
             );
         }).then(function(result) {
             resultTag.className = " font";
@@ -305,7 +367,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var displayTo = document.getElementById("searchResult1");
-        var caller = $('#caller1').val();
+        var caller = $('#caller0').val();
         App.contracts.LogisticsChain.deployed().then(function(instance) {
           return instance.searchForOrdersOfCaller(caller);
         }).then(function(result) {
@@ -315,9 +377,8 @@ App = {
 
           let html = '';
           displayTo.innerHTML = (
-            resultTag.forEach((item) => {
-                html += "Order ID: "+result[0]+"<br>";
-            }));
+                html += "Order ID: "+result[0]+"<br>"
+            );
 
         }).catch(function(err) {
           console.log(err.message);
@@ -329,15 +390,18 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var displayTo = document.getElementById("searchResult2");
-        var orderId = $('#orderID1').val();
+        // var orderId = $('#orderID1').val();
+        // App.readForm();
+        var orderId = parseInt($('#orderID1').val());
+        var caller = $('#caller1').val();
         App.contracts.LogisticsChain.deployed().then(function(instance) {
-          return instance.searchForOrderDetails(caller);
+          return instance.searchForOrderDetails(orderId, { from: caller});
         }).then(function(result) {
           while (displayTo.firstChild) {
               displayTo.removeChild(displayTo.firstChild);
           }
 
-          var orderDate = new Date(result[8].c[0] *1000);
+          var orderDate = new Date(result[8]*1000);
           displayTo.innerHTML = (
 
           "Consigner: "+result[0]+"<br>"+
@@ -348,7 +412,7 @@ App = {
           "Product Quantity: "+result[5]+"<br>"+
           "Order State: "+result[6]+"<br>"+
           "Order ID: "+result[7]+"<br>"+
-          "Order Created Date: "+orderDate);
+          "Order Created Date: "+orderDate.toISOString);
 
         }).catch(function(err) {
           console.log(err.message);
@@ -362,7 +426,7 @@ App = {
         var resultTag = document.getElementById("coil");
         var oid = $("#orderID2").val();
         var transportCompany = $("#tp").val();
-        App.contracts.SupplyChain.deployed().then(function(instance) {
+        App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             return instance.convertOrdersIntoLogisicsByConsigners(
                 oid,
@@ -391,11 +455,11 @@ App = {
               displayTo.removeChild(displayTo.firstChild);
           }
 
+
           let html = '';
           displayTo.innerHTML = (
-            resultTag.forEach((item) => {
-                html += "Logistics ID: "+result[0]+"<br>";
-            }));
+                html += "Logistics ID: "+result[0]+"<br>"
+            );
 
         }).catch(function(err) {
           console.log(err.message);
@@ -408,8 +472,9 @@ App = {
         var processId = parseInt($(event.target).data('id'));
         var displayTo = document.getElementById("searchResult4");
         var lid = $('#logisticsID1').val();
+        var caller = $('#caller3').val();
         App.contracts.LogisticsChain.deployed().then(function(instance) {
-          return instance.searchForLogisticsDetails(lid);
+          return instance.searchForLogisticsDetails(lid, { from: caller });
         }).then(function(result) {
           while (displayTo.firstChild) {
               displayTo.removeChild(displayTo.firstChild);
@@ -427,7 +492,7 @@ App = {
           "Transfer Stations: "+result[7]+"<br>"+
           "Logistics State: "+result[8]+"<br>"+
           "Current Transfer Station: "+result[9]+"<br>"+
-          "Logistics ID"+result[10]);
+          "Logistics ID: "+result[10]);
 
         }).catch(function(err) {
           console.log(err.message);
@@ -438,9 +503,9 @@ App = {
     collectProductByTransportCompany: function (event) {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
-        var displayTo = document.getElementById("cp");
+        var resultTag = document.getElementById("cp");
         var lid = $('#logisticsID2').val();
-        App.contracts.SupplyChain.deployed().then(function(instance) {
+        App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             return instance.collectProductByTransportCompany(
                 lid,
@@ -456,6 +521,113 @@ App = {
     },
 
     // you add
+    //12
+    transferProductByTransportCompany: function (event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var resultTag = document.getElementById("update_route");
+        var lid = $('#logisticsID2').val();
+        var stations = $('#transferStations').val();
+        App.transferStations = stations.split('\n');
+        App.contracts.LogisticsChain.deployed().then(function(instance) {
+            resultTag.className = " loader";
+            return instance.transferProductByTransportCompany(
+                lid,
+                App.transferStations,
+                {from: App.transportCompany, gas:3000000}
+            );
+        }).then(function(result) {
+            resultTag.className = " font";
+            resultTag.innerText = "  Tx Hash: "+result.tx + "\n" + "Transfer Route: " + stations;
+        }).catch(function(err) {
+          resultTag.className = " font";
+          resultTag.innerText = "  Error: "+err.message;
+        });
+    },
 
+    getCurrentMetaMaskID: function () {
+        web3 = new Web3(App.web3Provider);
+        web3.eth.getAccounts(function(err, res) {
+            if (err) {
+                console.log('Error:',err);
+                return
+            }
+            App.transferStation = res[0];
+        })
+    },
 
+    //13
+    updateCurrentTransferStationByTransferStation: function(event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var resultTag = document.getElementById("update_station");
+        var lid = $('#logisticsID2').val();
+        App.getCurrentMetaMaskID();
+        App.contracts.LogisticsChain.deployed().then(function(instance) {
+            resultTag.className = " loader";
+            return instance.updateCurrentTransferStationByTransferStation(
+                lid,
+                {from: App.transferStation, gas:3000000}
+            );
+        }).then(function(result) {
+            resultTag.className = " font";
+            resultTag.innerText = "Arrived on Station: " + App.transferStation;
+        }).catch(function(err) {
+          resultTag.className = " font";
+          resultTag.innerText = "  Error: "+err.message;
+        });
+    },
+
+    //14
+    arrivedProductByFinalTransferStation: function(event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var resultTag = document.getElementById("arrive");
+        var lid = $('#logisticsID2').val();
+        App.getCurrentMetaMaskID();
+        App.contracts.LogisticsChain.deployed().then(function(instance) {
+            resultTag.className = " loader";
+            return instance.arrivedProductByFinalTransferStation(
+                lid,
+                {from: App.transferStation, gas:3000000}
+            );
+        }).then(function(result) {
+            resultTag.className = " font";
+            resultTag.innerText = "  Tx Hash: "+result.tx;
+        }).catch(function(err) {
+          resultTag.className = " font";
+          resultTag.innerText = "  Error: "+err.message;
+        });
+    },
+
+    //15
+    orderFinishedByConsignee: function(event) {
+        event.preventDefault();
+        var processId = parseInt($(event.target).data('id'));
+        var resultTag = document.getElementById("finish");
+        var oid = $('#orderID').val();
+        App.contracts.LogisticsChain.deployed().then(function(instance) {
+            resultTag.className = " loader";
+            return instance.orderFinishedByConsignee(
+                oid,
+                {from: App.consignee, gas:3000000}
+            );
+        }).then(function(result) {
+            resultTag.className = " font";
+            resultTag.innerText = "  Tx Hash: "+result.tx;
+        }).catch(function(err) {
+          resultTag.className = " font";
+          resultTag.innerText = "  Error: "+err.message;
+        });
+    },
+
+},
+$(function () {
+    $(window).load(function () {
+        App.init();
+    });
+});
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

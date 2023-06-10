@@ -26,7 +26,29 @@
         <p id = "isConsignee" class = "inputFeilds"></p>
     </div>
 
-    <!--you add-->
+    <div class = "outline" style = "height: 100px; display: flex;">
+        <button class = "button " data-id="3">Add Transport Company</button>
+        <input id = "transportCompany" class = "inputFeilds">
+        <p id = "isTransportCompany" class = "inputFeilds"></p>
+    </div>
+
+    <div class = "outline" style = "height: 100px; display: flex;">
+        <button class = "button " data-id="4">Add Transfer Station</button>
+        <input id = "transferStation" class = "inputFeilds">
+        <p id = "isTransferStation" class = "inputFeilds"></p>
+    </div>
+<!-- 
+    <div class = "outline" style = "height: 100px; display: flex;">
+        <button class = "button " data-id="4">Add Transfer Station2</button>
+        <input id = "transferStation" class = "inputFeilds">
+        <p id = "isTransferStation" class = "inputFeilds"></p>
+    </div>
+
+    <div class = "outline" style = "height: 100px; display: flex;">
+        <button class = "button " data-id="4">Add Transfer Station3</button>
+        <input id = "transferStation" class = "inputFeilds">
+        <p id = "isTransferStation" class = "inputFeilds"></p>
+    </div> -->
 
     </div>
 </div>
@@ -37,15 +59,16 @@
         <div class = "contain font">
             <p>Consigner:</p><input id = "consigner" class = "inputFeilds">
             <p>Consignee:</p><input id = "consignee" class = "inputFeilds">
-            <p>Product Name:</p><input id = "productName" class = "inputFeilds">
-            <p>Product Code:</p><input id = "productCode" class = "inputFeilds">
-            <p>Product Price:</p><input id = "productPrice" class = "inputFeilds">
-            <p>Product Quantity:</p><input id = "productQuantity" class = "inputFeilds">
+            <p>Order ID:</p><input id = "orderID" class = "inputFeilds" type = "number" value = "1">
+            <p>Product Name:</p><input id = "productName" class = "inputFeilds" value = "bread">
+            <p>Product Code:</p><input id = "productCode" class = "inputFeilds" type = "number" value = "001">
+            <p>Product Price:</p><input id = "productPrice" class = "inputFeilds" type = "number" value = "5">
+            <p>Product Quantity:</p><input id = "productQuantity" class = "inputFeilds" type = "number" value = "2">
         </div>
     </div>
     <div class = "outline" style="
     margin: 1%;">
-        <button class = "button" data-id="5">Step 1: Create Orders By Consignee</button>
+        <button class = "button" data-id="5" style="height: 40px; margin: auto;">Step 1: Create Orders By Consignee</button>
         <p id = "initOrder" class = "font">
         </p>
     </div>
@@ -55,7 +78,7 @@
     <p class = "step">Search for Orders(ID) (ONLY CONSIGNER AND CONSIGNEE)</p>
     <div class = "outline">
         <div class = "contain font">
-            <p class = 'font'>Your Address:</p><input class = "inputFeilds" id = "caller1">
+            <p class = 'font'>Your Address:</p><input class = "inputFeilds" id = "caller0">
         </div>
     </div>
     <div class = "outline" style="
@@ -70,6 +93,7 @@
     <p class = "step">Search for Specific Order(ONLY CONSIGNER AND CONSIGNEE)</p>
     <div class = "outline">
         <div class = "contain font">
+            <p class = 'font'>Your Address:</p><input class = "inputFeilds" id = "caller1">
             <p class = 'font'>Order ID:</p><input class = "inputFeilds" id = "orderID1">
         </div>
     </div>
@@ -87,13 +111,13 @@
     <p class = "step">Deliver Product (ONLY CONSIGNER) </p>
     <div class = "outline">
         <div class = "contain font">
-            <p>Order ID:</p><input id = "orderID2" class = "inputFeilds">
+            <p>Order ID:</p><input id = "orderID2" type = "number" class = "inputFeilds">
             <p>Transport Company:</p><input id = "tp" class = "inputFeilds">
         </div>
     </div>
     <div>
     <div class = "outline" style="margin: 1%;">
-        <button class = "button" data-id="8"> Step 2: Convert Orders Into Logisics By Consigners</button>
+        <button class = "button" data-id="8" style="height: 40px; margin: auto;"> Step 2: Convert Orders Into Logisics By Consigners</button>
         <p id = "coil" class = "font"></p>
     </div>
   </div>
@@ -115,10 +139,11 @@
 </div>
 
 <div class = "step">
-    <p class = "step">Search for Specific Logistics</p>
+    <p class = "step">Search for Specific Logistics (ONLY CONSIGNER AND CONSIGNEE)</p>
     <div class = "outline">
         <div class = "contain font">
-            <p class = 'font'>Logistics ID:</p><input class = "inputFeilds" id = "logisticsID1">
+            <p class = 'font'>Your Address:</p><input class = "inputFeilds" id = "caller3">
+            <p class = 'font'>Logistics ID:</p><input class = "inputFeilds" type = "number" id = "logisticsID1">
         </div>
     </div>
     <div class = "outline" style="
@@ -134,16 +159,75 @@
     <p class = "step">Collect Product (ONLY TRANSPORT COMPANY) </p>
     <div class = "outline">
         <div class = "contain font">
-            <p>Logistics ID:</p><input id = "logisticsID2" class = "inputFeilds">
+            <p>Logistics ID:</p><input id = "logisticsID2" type = "number" class = "inputFeilds">
         </div>
     </div>
     <div class = "outline" style="margin: 1%; display: flex;">
-        <button class = "button" data-id="11"> Step 3: Collect Product By Transport Company</button>
+        <button class = "button" data-id="11" style="height: 40px; margin: auto;"> Step 3: Collect Product By Transport Company</button>
         <p id = "cp" class = "font"></p>
     </div>
 </div>
 
 <!--you add-->
+<div class = "step">
+    <p class = "step"> UPDATE LOGISTICS TRANSPORT ROUTE (ONLY TRANSPORT COMPANY) </p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p>Logistics ID:</p><input id = "logisticsID2" type = "number" class = "inputFeilds">
+            <p>Tranfer Stations</p>
+            <textarea id = "transferStations" class = "inputFeilds"></textarea>
+        </div>
+    </div>
+    <div class = "outline" style="margin: 1%; display: flex;">
+        <button class = "button" data-id="12" style="height: 40px; margin: auto;"> Step 4: Update Logistics Tansport Route And Begin to Transfer By Transport Company</button>
+        <p id = "update_route" class = "font"></p>
+    </div>
+</div>
 
+<div class = "step">
+    <p class = "step">UPDATE CURRENT STATION (ONLY TRANSFER STATION) </p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p>Logistics ID:</p><input id = "logisticsID2" type = "number" class = "inputFeilds">
+        </div>
+    </div>
+    <div class = "outline" style="margin: 1%; display: flex;">
+        <button class = "button" data-id="13" style="height: 40px; margin: auto;"> Step 5: Update Current Station By Transfer Station</button>
+        <p id = "update_station" class = "font"></p>
+    </div>
+</div>
+
+<div class = "step">
+    <p class = "step">PRODUCT ARRIVED (ONLY FINAL TRANSFER STATION) </p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p>Logistics ID:</p><input id = "logisticsID2" type = "number" class = "inputFeilds">
+        </div>
+    </div>
+    <div class = "outline" style="margin: 1%; display: flex;">
+        <button class = "button" data-id="14" style="height: 40px; margin: auto;"> Step 6: Product Arrived By Final Transfer Station</button>
+        <p id = "arrive" class = "font"></p>
+    </div>
+</div>
+
+<div class = "step">
+    <p class = "step">RECEIVE PRODUCT AND FINISH ORDER (ONLY CONSIGNEE) </p>
+    <div class = "outline">
+        <div class = "contain font">
+            <p>Order ID:</p><input id = "orderID" type = "number" class = "inputFeilds">
+        </div>
+    </div>
+    <div class = "outline" style="margin: 1%; display: flex;">
+        <button class = "button" data-id="15" style="height: 40px; margin: auto;"> Step 7: Receive Product And Finish Order By Consignee</button>
+        <p id = "finish" class = "font"></p>
+    </div>
+</div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="src/web3.min.js"></script>
+    <script src="src/truffle-contract.js"></script>
+    <script src="src/app.js"></script>
+
+</body>
 
 </html>

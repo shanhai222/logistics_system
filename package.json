@@ -1,8 +1,23 @@
 {
+  "name": "logistics-chain",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "lite-server"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "lite-server": "2.4.0"
+  },
   "dependencies": {
     "@openzeppelin/test-helpers": "^0.5.15",
     "truffle-hdwallet-provider": "^1.0.17",
     "web3": "^1.10.0",
-    "web3-providers-ws": "^4.0.1"
-  }
+    "web3-providers-ws": "^4.0.1",
+    "geth": "^0.4.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "description": ""
 }
