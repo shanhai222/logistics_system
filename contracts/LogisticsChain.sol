@@ -9,10 +9,8 @@ import "./roleControl/TransportCompanyRole.sol";
 
 contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,TransportCompanyRole{
 
-    uint256 public oid;  // orderId
+    uint256 public oID;  // orderId
     uint256 public lid;  // logisticsId
-    Structure.OrderDetails orderDetail;
-    Structure.LogisticsDetails logisticsDetail;
     address owner;
 
     mapping(uint256 => Structure.OrderDetails) orders;  // oid->orderdetails
@@ -21,17 +19,19 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     mapping(address => uint256[]) consignerOrders;  // the ordersID to the consigner
     mapping(address => uint256[]) consigneeLogistics;  // the logisticsID to the consignee
     mapping(address => uint256[]) consignerLogistics;  // the logisticsID from the consigner
+    mapping(address => uint256[]) companyLogistics;
     mapping(address => Structure.OrderHistory) orderHistory; // address->finishedorder[]
     mapping(address => Structure.LogisticsHistory) logisticsHistory; // address->finishedlogistics[]
     
     constructor() public payable {
         owner = msg.sender;
+        oID = 1;
     }
 
     //order
-    event OrderCreated(uint256 oid);
-    event OrderProceeding(uint256 oid);
-    event OrderFinished(uint256 oid);
+    event OrderCreated(uint256 _oid);
+    event OrderProceeding(uint256 _oid);
+    event OrderFinished(uint256 _oid);
     //deliver
     event DeliveredByConsigner(uint256 lid);
     event CollectedByTransportCompany(uint256 lid);
@@ -109,12 +109,14 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
             logisticsOfCaller = consignerLogistics[_add];
         }else if (isConsignee(_add)) {
             logisticsOfCaller = consigneeLogistics[_add];
+        }else if (isTransportCompany(_add)) {
+            logisticsOfCaller = companyLogistics[_add];
         }
         return logisticsOfCaller;
     }
 
     // declare a function to search for specific order
-    function searchForOrderDetails(uint256 _oid) public orderBelongsToCaller(_oid) returns
+    function searchForOrderDetails(uint256 _oid) public view orderBelongsToCaller(_oid) returns
     (   
         address Consigner,
         address Consignee,
@@ -127,7 +129,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         uint256 CreatedDate
     )
     {
-        orderDetail = orders[_oid];
+        Structure.OrderDetails memory orderDetail = orders[_oid];
         return 
         (
             orderDetail.Consigner, 
@@ -143,7 +145,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     }
 
     // declare a function to search for specific logistics
-    function searchForLogisticsDetails(uint256 _lid) public logisticsBelongsToCaller(_lid) returns
+    function searchForLogisticsDetails(uint256 _lid) public view logisticsBelongsToCaller(_lid) returns
     (
         address Consigner,
         address Consignee,
@@ -158,7 +160,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         uint256 LogisticsId
     ) 
     {
-        logisticsDetail = logistics[_lid];
+        Structure.LogisticsDetails memory logisticsDetail = logistics[_lid];
         return
         (
             logisticsDetail.Consigner,
@@ -187,9 +189,8 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         uint256 _ProductCode,
         uint256 _ProductPrice,
         uint256 _ProductQuantity,
-        uint256 _OrderId,
         uint256 _CreatedDate
-    ) public onlyConsignee {
+    ) public onlyConsignee() {
         Structure.OrderDetails memory order;
         Structure.ProductDetails memory product;
         product.ProductName = _ProductName;
@@ -200,16 +201,20 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         order.Consignee = _Consignee;
         order.Productdetails = product;
         order.state = Structure.State.OrderCreated;
-        order.OrderId = _OrderId;
+        order.OrderId = oID;
         order.CreatedDate = _CreatedDate;
-        orders[_OrderId] = order;
-        consigneeOrders[msg.sender].push(_OrderId);
-        address consigner = order.Consigner;
-        consignerOrders[consigner].push(_OrderId);
+        orders[oID] = order;
+        consigneeOrders[msg.sender].push(oID);
+        //address consigner = order.Consigner;
+        consignerOrders[_Consigner].push(oID);
 
-        emit OrderCreated(_OrderId);
+        emit OrderCreated(oID);
     }
 
+    function setOid() public onlyConsignee() {
+        oID ++;
+    }
+    
     /*
     2nd step in logisticschain
     Allows consigners to convert orders into logisics
@@ -222,7 +227,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         orders[_oid].state = Structure.State.OrderProceeding;  // change the state of the order
         emit OrderProceeding(_oid);
 
-        orderDetail = orders[_oid];
+        Structure.OrderDetails memory orderDetail = orders[_oid];
         Structure.LogisticsDetails memory one_logistics;
         one_logistics.Consigner = orderDetail.Consigner;
         one_logistics.Consignee = orderDetail.Consignee;
@@ -236,6 +241,7 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
         logistics[lid] = one_logistics;
         consignerLogistics[msg.sender].push(lid);
         consigneeLogistics[orderDetail.Consignee].push(lid);
+        companyLogistics[_TransportCompany].push(lid);
 
         emit DeliveredByConsigner(lid);
     }

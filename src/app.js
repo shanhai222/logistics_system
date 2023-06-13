@@ -6,42 +6,19 @@ App = {
     ownerID: "0x0000000000000000000000000000000000000000",
     consigner: "0x0000000000000000000000000000000000000000",
     consignee: "0x0000000000000000000000000000000000000000",
+    caller: "0x0000000000000000000000000000000000000000",
     productName: null,
     productCode: 0,
     productQuantity: 0,
     productPrice: 0,
     transportCompany: "0x0000000000000000000000000000000000000000",
-    // transferStation1: "0x0000000000000000000000000000000000000000",
-    // transferStation2: "0x0000000000000000000000000000000000000000",
-    // transferStation3: "0x0000000000000000000000000000000000000000",
     transferStation: "0x0000000000000000000000000000000000000000",
     transferStations: [],
 
 
     init: async function () {
-        App.readForm();
         /// Setup access to blockchain
         return await App.initWeb3();
-    },
-
-    readForm: function () {
-        App.orderID = $("#orderID").val();
-        App.consigner = $("#consigner").val();
-        App.consignee = $("#consignee").val();
-        App.productName = $("#productName").val();
-        App.productCode = $("#productCode").val();
-        App.productQuantity = $("#productQuantity").val();
-        App.productPrice = $("#productPrice").val();
-
-        console.log(
-            App.orderID,
-            App.consigner, 
-            App.consignee, 
-            App.productName, 
-            App.productCode, 
-            App.productQuantity, 
-            App.productPrice, 
-        );
     },
 
     initWeb3: async function () {
@@ -83,29 +60,13 @@ App = {
             }
 
             App.metamaskAccountID = res[0];
-            if (res.length > 1){
-            document.getElementById("divType").innerText = "Ganache Address"
-            console.log("Using Ganache");
-            App.consignee = res[1];
-            document.getElementById("consignee").value = App.consignee;
-            App.consigner = res[2];
-            document.getElementById("consigner").value = App.consigner;
-            App.transportCompany = res[3];
-            document.getElementById("transportCompany").value = App.transportCompany;
-            App.transferStation1 = res[4];
-            document.getElementById("transferStation1").value = App.transferStation1;
-            App.transferStation2 = res[5];
-            document.getElementById("transferStation2").value = App.transferStation2;
-            App.transferStation3 = res[6];
-            document.getElementById("transferStation3").value = App.transferStation3;
-          }else{
             document.getElementById("divType").innerText = "Using MetaMask Address"
             App.consignee = document.getElementById("consignee").value;
             App.consigner = document.getElementById("consigner").value;
             App.transportCompany = document.getElementById("transportCompany").value;
             App.transferStation = document.getElementById("transferStation").value;
           }
-        })
+        )
     },
 
     initLogisticsChain: function () {
@@ -192,6 +153,51 @@ App = {
                 break;
 
             }
+    },
+
+    getCurrentMetaMaskID: function () {
+        web3 = new Web3(App.web3Provider);
+    
+        return new Promise((resolve, reject) => {
+            web3.eth.getAccounts(function(err, res) {
+                if (err) {
+                    console.log('Error:',err);
+                    reject(err);
+                }
+                else {
+                    App.caller = res[0];
+                    resolve(res[0]);
+                }
+            })
+        });
+    },
+
+    // a function to Convert state format
+    convertState: function(state) {
+        var state_str = '';
+        switch(state) {
+            case 0:
+                state_str = 'OrderCreated';
+                return state_str;
+            case 1:
+                state_str = 'OrderProceeding'
+                return state_str;
+            case 2:
+                state_str = 'OrderFinished';
+                return state_str;
+            case 3:
+                state_str = 'DeliveredByConsigner';
+                return state_str;
+            case 4:
+                state_str = 'CollectedByTransportCompany';
+                return state_str;
+            case 5:
+                state_str = 'InTransit';
+                return state_str;
+            case 6:
+                state_str = 'Arrived';
+                return state_str;
+        }
     },
 
     //1
@@ -318,9 +324,6 @@ App = {
             resultTag.innerText = result;
             if (result == true){
                 resultTag.style.color = "green";
-                // // empty input text
-                // resultTag.value = "";
-                // App.transferStation = "0x0000000000000000000000000000000000000000";
             }else{
                 resultTag.style.color = "red"
 
@@ -337,25 +340,38 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("initOrder");
-        App.readForm();
+        var consigner1 = document.getElementById("consigner1").value;
+        var consignee1 = document.getElementById("consignee1").value;
+        var productName = document.getElementById("productName").value;
+        var productCode = parseInt(document.getElementById("productCode").value);
+        var productPrice = parseInt(document.getElementById("productPrice").value);
+        var productQuantity = parseInt(document.getElementById("productQuantity").value);
+        //var orderID = parseInt(document.getElementById("orderID").value);
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             var orderDate = new Date();
             var Timestamp = Math.floor(orderDate.getTime() / 1000);
             return instance.initOrdersForConsignee(
-                App.consigner,
-                App.consignee,
-                App.productName,
-                App.productCode,
-                App.productPrice,
-                App.productQuantity,
-                App.orderID,
+                consigner1,
+                consignee1,
+                productName,
+                productCode,
+                productPrice,
+                productQuantity,
+                //orderID,
                 Timestamp,
-                {from: App.consignee, gas:3000000}
+                {from: App.caller, gas:3000000}
             );
         }).then(function(result) {
+            console.log(result);
             resultTag.className = " font";
             resultTag.innerText = "  Tx Hash: "+result.tx;
+            return App.contracts.LogisticsChain.deployed().then(function(instance) {
+                return instance.setOid({ from: App.caller, gas:3000000});
+            });
         }).catch(function(err) {
           resultTag.className = " font";
           resultTag.innerText = "  Error: "+err.message;
@@ -367,19 +383,21 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var displayTo = document.getElementById("searchResult1");
-        var caller = $('#caller0').val();
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
-          return instance.searchForOrdersOfCaller(caller);
+          return instance.searchForOrdersOfCaller(App.caller);
         }).then(function(result) {
           while (displayTo.firstChild) {
               displayTo.removeChild(displayTo.firstChild);
           }
 
-          let html = '';
-          displayTo.innerHTML = (
-                html += "Order ID: "+result[0]+"<br>"
-            );
-
+          let html = "Order ID: ";
+            for (var i = 0; i < result.length; i++){
+                html += result[i] + " ";
+            }
+            displayTo.innerHTML = html;
         }).catch(function(err) {
           console.log(err.message);
         });
@@ -390,18 +408,19 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var displayTo = document.getElementById("searchResult2");
-        // var orderId = $('#orderID1').val();
-        // App.readForm();
-        var orderId = parseInt($('#orderID1').val());
-        var caller = $('#caller1').val();
+        var orderID = parseInt(document.getElementById("orderID1").value);
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
-          return instance.searchForOrderDetails(orderId, { from: caller});
+          return instance.searchForOrderDetails(orderID, { from: App.caller });
         }).then(function(result) {
           while (displayTo.firstChild) {
               displayTo.removeChild(displayTo.firstChild);
           }
 
           var orderDate = new Date(result[8]*1000);
+          var state = App.convertState(parseInt(result[6]));
           displayTo.innerHTML = (
 
           "Consigner: "+result[0]+"<br>"+
@@ -410,9 +429,9 @@ App = {
           "Product Code: "+result[3]+"<br>"+
           "Product Price: "+result[4]+"<br>"+
           "Product Quantity: "+result[5]+"<br>"+
-          "Order State: "+result[6]+"<br>"+
+          "Order State: "+state+"<br>"+
           "Order ID: "+result[7]+"<br>"+
-          "Order Created Date: "+orderDate.toISOString);
+          "Order Created Date: "+orderDate);
 
         }).catch(function(err) {
           console.log(err.message);
@@ -424,14 +443,17 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("coil");
-        var oid = $("#orderID2").val();
-        var transportCompany = $("#tp").val();
+        var orderID = parseInt(document.getElementById("orderID2").value);
+        var transportCompany = document.getElementById("tp").value;
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             return instance.convertOrdersIntoLogisicsByConsigners(
-                oid,
+                orderID,
                 transportCompany,
-                {from: App.consigner, gas:3000000}
+                {from: App.caller, gas:3000000}
             );
         }).then(function(result) {
             resultTag.className = " font";
@@ -447,19 +469,21 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var displayTo = document.getElementById("searchResult3");
-        var caller = $('#caller2').val();
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
-          return instance.searchForLogisticsOfCaller(caller);
+          return instance.searchForLogisticsOfCaller(App.caller);
         }).then(function(result) {
           while (displayTo.firstChild) {
               displayTo.removeChild(displayTo.firstChild);
           }
 
-
-          let html = '';
-          displayTo.innerHTML = (
-                html += "Logistics ID: "+result[0]+"<br>"
-            );
+          let html = "Logistics ID: ";
+            for (var i = 0; i < result.length; i++){
+                html += result[i] + " ";
+            }
+            displayTo.innerHTML = html;
 
         }).catch(function(err) {
           console.log(err.message);
@@ -471,15 +495,22 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var displayTo = document.getElementById("searchResult4");
-        var lid = $('#logisticsID1').val();
-        var caller = $('#caller3').val();
+        var lid = parseInt(document.getElementById("logisticsID1").value);
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
-          return instance.searchForLogisticsDetails(lid, { from: caller });
+          return instance.searchForLogisticsDetails(lid, { from: App.caller });
         }).then(function(result) {
           while (displayTo.firstChild) {
               displayTo.removeChild(displayTo.firstChild);
           }
-
+          
+          var state = App.convertState(parseInt(result[8]));
+          let station = "<br>";
+            for (var i = 0; i < result[7].length; i++){
+                station += result[7][i] + "<br>";
+            }
           displayTo.innerHTML = (
 
           "Consigner: "+result[0]+"<br>"+
@@ -489,8 +520,8 @@ App = {
           "Product Code: "+result[4]+"<br>"+
           "Product Price: "+result[5]+"<br>"+
           "Product Quantity: "+result[6]+"<br>"+
-          "Transfer Stations: "+result[7]+"<br>"+
-          "Logistics State: "+result[8]+"<br>"+
+          "Transfer Stations: "+station+"<br>"+
+          "Logistics State: "+state+"<br>"+
           "Current Transfer Station: "+result[9]+"<br>"+
           "Logistics ID: "+result[10]);
 
@@ -504,12 +535,15 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("cp");
-        var lid = $('#logisticsID2').val();
+        var lid = parseInt(document.getElementById("logisticsID2").value);
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             return instance.collectProductByTransportCompany(
                 lid,
-                {from: App.transportCompany, gas:3000000}
+                {from: App.caller, gas:3000000}
             );
         }).then(function(result) {
             resultTag.className = " font";
@@ -520,15 +554,15 @@ App = {
         });
     },
 
-    // you add
     //12
     transferProductByTransportCompany: function (event) {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("update_route");
-        var lid = $('#logisticsID2').val();
+        var lid = parseInt(document.getElementById("logisticsID2").value);
         var stations = $('#transferStations').val();
         App.transferStations = stations.split('\n');
+        console.log(App.transferStations);
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             return instance.transferProductByTransportCompany(
@@ -538,23 +572,13 @@ App = {
             );
         }).then(function(result) {
             resultTag.className = " font";
-            resultTag.innerText = "  Tx Hash: "+result.tx + "\n" + "Transfer Route: " + stations;
+            resultTag.innerText = "  Tx Hash: "+result.tx + "\n" + "Transfer Route: " + "\n" + stations;
         }).catch(function(err) {
           resultTag.className = " font";
           resultTag.innerText = "  Error: "+err.message;
         });
     },
 
-    getCurrentMetaMaskID: function () {
-        web3 = new Web3(App.web3Provider);
-        web3.eth.getAccounts(function(err, res) {
-            if (err) {
-                console.log('Error:',err);
-                return
-            }
-            App.transferStation = res[0];
-        })
-    },
 
     //13
     updateCurrentTransferStationByTransferStation: function(event) {
@@ -562,16 +586,18 @@ App = {
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("update_station");
         var lid = $('#logisticsID2').val();
-        App.getCurrentMetaMaskID();
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             return instance.updateCurrentTransferStationByTransferStation(
                 lid,
-                {from: App.transferStation, gas:3000000}
+                {from: App.caller, gas:3000000}
             );
         }).then(function(result) {
             resultTag.className = " font";
-            resultTag.innerText = "Arrived on Station: " + App.transferStation;
+            resultTag.innerText = "Arrived on Station: " + App.caller;
         }).catch(function(err) {
           resultTag.className = " font";
           resultTag.innerText = "  Error: "+err.message;
@@ -583,13 +609,15 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("arrive");
-        var lid = $('#logisticsID2').val();
-        App.getCurrentMetaMaskID();
+        var lid = parseInt(document.getElementById("logisticsID2").value);
+        App.getCurrentMetaMaskID()
+        .then(caller => console.log("Current caller:", caller))
+        .catch(err => console.error("Error:", err));
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             return instance.arrivedProductByFinalTransferStation(
                 lid,
-                {from: App.transferStation, gas:3000000}
+                {from: App.caller, gas:3000000}
             );
         }).then(function(result) {
             resultTag.className = " font";
@@ -605,7 +633,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("finish");
-        var oid = $('#orderID').val();
+        var oid = parseInt(document.getElementById("orderID").value);
         App.contracts.LogisticsChain.deployed().then(function(instance) {
             resultTag.className = " loader";
             return instance.orderFinishedByConsignee(
