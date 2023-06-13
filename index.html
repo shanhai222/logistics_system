@@ -10,7 +10,7 @@
 <body class = "font">
     <h1>Logistics Chain</h1>
   <div class = "step">
-    <p class = "step"> Step 1: Add Address to appropriate role</p>
+    <p class = "step"> Step 1: Add Address to appropriate role (ONLY OWNER)</p>
     <p class = "step"> If false, try again! </p>
     <p class = "step" id = "divType"></p>
     <div class = "outline"style = "height: 100px; display: flex;">
@@ -37,18 +37,6 @@
         <input id = "transferStation" class = "inputFeilds">
         <p id = "isTransferStation" class = "inputFeilds"></p>
     </div>
-<!-- 
-    <div class = "outline" style = "height: 100px; display: flex;">
-        <button class = "button " data-id="4">Add Transfer Station2</button>
-        <input id = "transferStation" class = "inputFeilds">
-        <p id = "isTransferStation" class = "inputFeilds"></p>
-    </div>
-
-    <div class = "outline" style = "height: 100px; display: flex;">
-        <button class = "button " data-id="4">Add Transfer Station3</button>
-        <input id = "transferStation" class = "inputFeilds">
-        <p id = "isTransferStation" class = "inputFeilds"></p>
-    </div> -->
 
     </div>
 </div>
@@ -59,7 +47,7 @@
         <div class = "contain font">
             <p>Consigner:</p><input id = "consigner1" class = "inputFeilds" >
             <p>Consignee:</p><input id = "consignee1" class = "inputFeilds">
-            <p>Order ID:</p><input id = "orderID" class = "inputFeilds">
+            <!-- <p>Order ID:</p><input id = "orderID" class = "inputFeilds"> -->
             <p>Product Name:</p><input id = "productName" class = "inputFeilds">
             <p>Product Code:</p><input id = "productCode" class = "inputFeilds">
             <p>Product Price:</p><input id = "productPrice" class = "inputFeilds">
@@ -71,6 +59,8 @@
         <button class = "button" data-id="5" style="height: 40px; margin: auto;">Step 1: Create Orders By Consignee</button>
         <p id = "initOrder" class = "font">
         </p>
+    </div>
+    <div id = "searchResult0">
     </div>
 </div>
 
@@ -84,6 +74,7 @@
     <div class = "outline" style="
     margin: 1%;">
         <button class = "button" data-id="6" style="height: 40px; margin: auto;">Search All Your Orders(ID)</button>
+    </div>
     <div id = "searchResult1">
     </div>
     
@@ -124,11 +115,6 @@
 
 <div class = "step">
     <p class = "step">Search for Logistics(ID)</p>
-    <!-- <div class = "outline">
-        <div class = "contain font">
-            <p class = 'font'>Your Address:</p><input class = "inputFeilds" id = "caller1">
-        </div>
-    </div> -->
     <div class = "outline" style="
     margin: 1%;">
         <button class = "button" data-id="9" style="height: 40px; margin: auto;">Search All Your Logistics(ID)</button>
@@ -138,7 +124,7 @@
 </div>
 
 <div class = "step">
-    <p class = "step">Search for Specific Logistics (ONLY CONSIGNER AND CONSIGNEE)</p>
+    <p class = "step">Search for Specific Logistics</p>
     <div class = "outline">
         <div class = "contain font">
             <p class = 'font'>Logistics ID:</p><input class = "inputFeilds" type = "number" id = "logisticsID1">

@@ -340,6 +340,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
         var resultTag = document.getElementById("initOrder");
+        var displayTo = document.getElementById("searchResult0");
         var consigner1 = document.getElementById("consigner1").value;
         var consignee1 = document.getElementById("consignee1").value;
         var productName = document.getElementById("productName").value;
@@ -369,6 +370,19 @@ App = {
             console.log(result);
             resultTag.className = " font";
             resultTag.innerText = "  Tx Hash: "+result.tx;
+            
+            return App.contracts.LogisticsChain.deployed().then(function(instance) {
+                return instance.getOid({ from: App.caller, gas:3000000});
+            });
+        }).then(function(result) {
+
+            while (displayTo.firstChild) {
+                displayTo.removeChild(displayTo.firstChild);
+            }
+  
+            let html = "Order ID: "+result;
+            displayTo.innerHTML = html;
+
             return App.contracts.LogisticsChain.deployed().then(function(instance) {
                 return instance.setOid({ from: App.caller, gas:3000000});
             });

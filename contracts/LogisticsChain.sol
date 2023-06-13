@@ -214,7 +214,11 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     function setOid() public onlyConsignee() {
         oID ++;
     }
-    
+
+    function getOid() public view onlyConsignee() returns (uint256) {
+        return oID;
+    }
+
     /*
     2nd step in logisticschain
     Allows consigners to convert orders into logisics
