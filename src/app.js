@@ -529,7 +529,7 @@ App = {
 
           "Consigner: "+result[0]+"<br>"+
           "Consignee: "+result[1]+"<br>"+
-          "Transport Company"+result[2]+"<br>"+
+          "Transport Company: "+result[2]+"<br>"+
           "Product Name: "+result[3]+"<br>"+
           "Product Code: "+result[4]+"<br>"+
           "Product Price: "+result[5]+"<br>"+

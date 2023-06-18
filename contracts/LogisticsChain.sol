@@ -38,12 +38,6 @@ contract LogisticsChain is ConsigneeRole,ConsignerRole,TransferStationRole,Trans
     event InTransit(uint256 lid);
     event Arrived(uint256 lid);
 
-    // checks to see if msg.sender == owner of the contract
-    modifier verifyAddress(address add) {
-        require(msg.sender == add);
-        _;
-    }
-
     modifier orderBelongsToCaller(uint256 _oid) {
         require(orders[_oid].Consigner == msg.sender || orders[_oid].Consignee == msg.sender);
         _;
